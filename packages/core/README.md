@@ -27,7 +27,7 @@ cargo build -r # release
 执行 run 指令运行程序
 
 ```bash
-cargo run
+cargo run -- "C:/Users/10563/Desktop/tomori_nao.png" # 参数为需要读取的文件
 ```
 
 > 如果 `cargo run` 的过程中出现 `(exit code: 0xc0000135, STATUS_DLL_NOT_FOUND)` 的错误，请确认环境变量是否按要求配置并生效，或者将该仓库下的 `opencv_world460.dll` 拷贝至待执行的 exe 文件旁。
