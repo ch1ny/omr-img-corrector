@@ -15,3 +15,19 @@ choco install llvm opencv
 - **OPENCV_LINK_PATHS**: C:\tools\opencv\build\x64\vc15\lib
 
 > 这里的 `OPENCV_LINK_LIBS` 实际上就是 `OPENCV_LINK_PATHS` 下的 `.lib` 文件。
+
+## 2. 通过 cargo 编译源代码
+
+```bash
+cargo build
+# 或
+cargo build -r # release
+```
+
+执行 run 指令运行程序
+
+```bash
+cargo run
+```
+
+> 如果 `cargo run` 的过程中出现 `(exit code: 0xc0000135, STATUS_DLL_NOT_FOUND)` 的错误，请确认环境变量是否按要求配置并生效，或者将该仓库下的 `opencv_world460.dll` 拷贝至待执行的 exe 文件旁。
