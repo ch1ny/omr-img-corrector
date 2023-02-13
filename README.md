@@ -1,9 +1,9 @@
-# Design and implementation of OMR card image correction based on projection - 2023 Software engineering graduation project of Shandong University
+# 基于投影的OMR卡片图像纠偏设计与实现 - 山东大学 2019 级软件工程毕业设计课题
 
-## Catalogue
+## 目录安排
 
-The repository adopts the **monorepo** policy, with the core code stored in the `packages` folder at the root of the project.
+本仓库采用 monorepo 策略，核心代码存放于项目根目录下的 `packages` 文件夹当中。
 
-- **core**: Core algorithm program, as the first priority for development.
-- **lib**: OMR card image correction algorithm library extracted and packaged according to the core algorithm program.
-- **app**: Desktop program based on tauri and core algorithm library.
+- **core**: 核心算法程序，作为第一优先级进行开发。
+- **lib**: 根据核心算法程序提取、封装的 OMR 卡片图像纠偏算法库。
+- **app**: 基于 tauri 和核心算法库开发的桌面级程序。
