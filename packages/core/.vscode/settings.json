@@ -10,6 +10,7 @@
 		"imgcodecs",
 		"imgproc",
 		"imread",
+		"imshow",
 		"ml",
 		"objdetect",
 		"opencv",
