@@ -24,6 +24,8 @@ cargo build
 cargo build -r # release
 ```
 
+**此处有一步非常重要的步骤不可以省略，否则会导致应用无法运行**，将该仓库下的 `opencv_world460.dll` 拷贝至待执行的 exe 文件旁。
+
 执行 run 指令运行程序
 
 ```bash
