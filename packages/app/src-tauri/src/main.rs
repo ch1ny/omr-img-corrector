@@ -5,6 +5,8 @@
 
 use tauri::Manager;
 
+mod hardware;
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn show_main_window(window: tauri::Window) {
@@ -14,7 +16,10 @@ async fn show_main_window(window: tauri::Window) {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![show_main_window])
+        .invoke_handler(tauri::generate_handler![
+            show_main_window,
+            hardware::system_hardware_info
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
