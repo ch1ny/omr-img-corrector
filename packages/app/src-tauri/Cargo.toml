@@ -2,7 +2,7 @@
 name = "omr-img-corrector"
 version = "0.0.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["HanshinKira"]
 license = ""
 repository = ""
 edition = "2021"
