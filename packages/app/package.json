@@ -11,8 +11,12 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
+    "classnames": "^2.3.2",
+    "mobx": "^6.8.0",
+    "mobx-react": "^7.6.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.2",
