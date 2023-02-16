@@ -7,3 +7,9 @@ edition = "2021"
 
 [dependencies]
 opencv = { version = "0.76.4", default-features = true, features = ["highgui", "imgcodecs"] }
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
