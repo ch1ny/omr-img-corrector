@@ -69,6 +69,40 @@ pub fn transfer_gray_image_to_thresh_binary(src: &MyMat) -> Result<MyMat, opencv
     Ok(MyMat::new(dst))
 }
 
+/// 提取黑白二值图的横向投影数据
+#[allow(dead_code)]
+pub fn get_horizontal_projection(src: &MyMat) -> Result<Vec<usize>, opencv::Error> {
+    let mat = &src.mat;
+
+    let mut result = vec![];
+
+    // 遍历每一行
+    for row_index in 0..mat.rows() {
+        // 获取当前行的数据数组
+        let row = mat.at_row::<u8>(row_index)?;
+
+        // 当前行黑色的色块总数
+        let mut sum: usize = 0;
+
+        // 遍历当前行的每一个色块
+        for col_index in 0..src.mat.cols() {
+            // 如果为白色色块
+            // 不做处理
+            if row[col_index as usize] == 255 {
+                continue;
+            }
+
+            // 如果为黑色色块
+            // 总数加一
+            sum += 1;
+        }
+
+        result.push(sum);
+    }
+
+    Ok(result)
+}
+
 /// 将黑白二值图转换为横向投影图
 #[allow(dead_code)]
 pub fn transfer_thresh_binary_to_horizontal_projection(
@@ -110,6 +144,32 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
     }
 
     Ok(MyMat::new(mat))
+}
+
+/// 提取黑白二值图的纵向投影数据
+#[allow(dead_code)]
+pub fn get_vertical_projection(src: &MyMat) -> Result<Vec<usize>, opencv::Error> {
+    let mat = &src.mat;
+
+    let mut result = vec![];
+
+    // 遍历每一列
+    for col_index in 0..mat.cols() {
+        let mut sum: usize = 0;
+
+        // 遍历每一行
+        for row_index in 0..mat.rows() {
+            // 获取指定位置的色块数值
+            // 如果为黑色则加一
+            if mat.at_row::<u8>(row_index)?[col_index as usize] == 0 {
+                sum += 1;
+            }
+        }
+
+        result.push(sum);
+    }
+
+    Ok(result)
 }
 
 /// 将黑白二值图转换为纵向投影图
