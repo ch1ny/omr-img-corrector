@@ -6,3 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+opencv = { version = "0.77.0", default-features = true, features = ["highgui", "imgcodecs"] }
+
+[lib]
+name = "oics"
+crate-type = ["rlib"]

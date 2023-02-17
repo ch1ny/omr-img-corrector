@@ -13,6 +13,7 @@
 		"imshow",
 		"ml",
 		"objdetect",
+		"oics",
 		"opencv",
 		"photo",
 		"stitching",

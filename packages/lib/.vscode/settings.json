@@ -1,0 +1,23 @@
+{
+	"cSpell.words": [
+		"calib3d",
+		"core",
+		"dnn",
+		"features2d",
+		"flann",
+		"gapi",
+		"highgui",
+		"imgcodecs",
+		"imgproc",
+		"imread",
+		"imshow",
+		"ml",
+		"objdetect",
+		"oics",
+		"opencv",
+		"photo",
+		"stitching",
+		"video",
+		"videoio"
+	]
+}

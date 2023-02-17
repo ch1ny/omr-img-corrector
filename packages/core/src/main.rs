@@ -1,7 +1,5 @@
-use opencv::{highgui, imgcodecs};
+use oics::{ highgui, imgcodecs, transfer };
 use std::env;
-
-mod transfer;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,7 +7,7 @@ fn main() {
         panic!("参数数目有误！");
     }
 
-    let mut image = transfer::MyMat::default();
+    let mut image = transfer::TransformableMat::default();
     image
         .load_mat(&args[1], imgcodecs::IMREAD_UNCHANGED)
         .expect("读取图片时发生错误");
