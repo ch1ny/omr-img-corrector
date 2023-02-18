@@ -3,8 +3,8 @@ import { Invokers } from './utils';
 
 export default async () => {
 	{
-		const hardwareInfo = await Invokers.getSystemHardwareInfo();
-		stores.hardware.setCpuInfo(hardwareInfo.cpu);
+		const cpuInfo = await Invokers.getCpuInfo();
+		stores.hardware.setCpuInfo(cpuInfo);
 	}
 
 	Invokers.showMainWindow();

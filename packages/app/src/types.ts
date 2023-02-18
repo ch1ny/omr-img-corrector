@@ -13,6 +13,14 @@ export interface ICpuInfo {
 	maxThreadCounts: number;
 }
 
+export interface IGpuInfo {
+	/**
+	 * 显卡型号
+	 */
+	gpuName: string;
+}
+
 export interface ISystemHardwareInfo {
 	cpu: ICpuInfo;
+	gpu: IGpuInfo;
 }

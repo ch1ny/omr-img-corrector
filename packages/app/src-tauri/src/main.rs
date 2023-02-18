@@ -18,7 +18,8 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             show_main_window,
-            hardware::system_hardware_info
+            hardware::system_cpu_info,
+            hardware::system_hardware_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

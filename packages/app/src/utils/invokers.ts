@@ -1,4 +1,4 @@
-import { ISystemHardwareInfo } from '@/types';
+import { ICpuInfo } from '@/types';
 import { invoke } from '@tauri-apps/api';
 
 /**
@@ -13,13 +13,19 @@ const showMainWindow = () => {
  * 获取系统硬件信息
  * @returns
  */
-const getSystemHardwareInfo = async () => {
-	const hardwares = await invoke('system_hardware_info');
+const getCpuInfo = async () => {
+	const cpu_info: any = await invoke('system_cpu_info');
 
-	return <ISystemHardwareInfo>hardwares;
+	const cpuInfo: ICpuInfo = {
+		chipName: cpu_info.chip_name.trim(),
+		physicalCoreCounts: cpu_info.physical_core_counts,
+		maxThreadCounts: cpu_info.max_thread_counts,
+	};
+
+	return cpuInfo;
 };
 
 export const Invokers = {
 	showMainWindow,
-	getSystemHardwareInfo,
+	getCpuInfo,
 };

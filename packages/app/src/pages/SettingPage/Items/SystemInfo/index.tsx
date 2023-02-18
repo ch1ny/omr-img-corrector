@@ -17,6 +17,8 @@ const SystemInfo = () => {
 		[stores.hardware.cpu]
 	);
 
+	console.log(stores.hardware);
+
 	return (
 		<div className={styles.systemInfo}>
 			<div></div>
