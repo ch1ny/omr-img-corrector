@@ -6,6 +6,8 @@ pub mod constants;
 
 pub mod transfer;
 
+pub mod types;
+
 #[cfg(test)]
 mod tests {
     use crate::constants::ImReadFlags;

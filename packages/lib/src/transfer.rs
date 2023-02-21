@@ -5,9 +5,10 @@ use opencv::{
     highgui, imgcodecs,
     imgproc::{self, get_rotation_matrix_2d, warp_affine},
     prelude::{Mat, MatTraitConst, MatTraitConstManual, MatTraitManual},
+    types::VectorOfi32,
 };
 
-use crate::calculate;
+use crate::{calculate, types::ImageFormat};
 
 pub struct TransformableMat {
     mat: Mat,
@@ -52,6 +53,35 @@ impl TransformableMat {
     #[allow(dead_code)]
     pub fn get_bytes(self: &Self) -> Result<&[u8], opencv::Error> {
         self.mat.data_bytes()
+    }
+
+    /// 将图像自身输出到指定位置
+    #[allow(dead_code)]
+    pub fn im_write(
+        self: &Self,
+        filename: &str,
+        format: ImageFormat,
+        quality: i32,
+    ) -> Result<bool, opencv::Error> {
+        let mat = &self.mat;
+
+        let mut quality_vec = VectorOfi32::with_capacity(2);
+        match format {
+            ImageFormat::JPEG => {
+                quality_vec.push(imgcodecs::IMWRITE_JPEG_QUALITY);
+                quality_vec.push(quality);
+            }
+            ImageFormat::PNG => {
+                quality_vec.push(imgcodecs::IMWRITE_PNG_COMPRESSION);
+                quality_vec.push(quality);
+            }
+            ImageFormat::WEBP => {
+                quality_vec.push(imgcodecs::IMWRITE_WEBP_QUALITY);
+                quality_vec.push(quality);
+            }
+        };
+
+        return imgcodecs::imwrite(filename, mat, &quality_vec);
     }
 }
 
@@ -237,7 +267,8 @@ pub fn transfer_thresh_binary_to_vertical_projection(
 #[allow(dead_code)]
 pub fn rotate_mat(
     src: &TransformableMat,
-    deg: f64,
+    angle: f64,
+    scale: f64,
     flags: i32,
     border_mode: i32,
     border_value: Scalar,
@@ -250,7 +281,7 @@ pub fn rotate_mat(
     center_pos.x = (size.width as f32) / 2.0;
     center_pos.y = (size.height as f32) / 2.0;
 
-    let rotate_matrix = get_rotation_matrix_2d(center_pos, deg, 1.0)?;
+    let rotate_matrix = get_rotation_matrix_2d(center_pos, angle, scale)?;
 
     let mut dst = Mat::default();
 
