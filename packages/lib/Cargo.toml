@@ -11,3 +11,9 @@ opencv = { version = "0.77.0", default-features = true, features = ["highgui", "
 [lib]
 name = "oics"
 crate-type = ["rlib"]
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3

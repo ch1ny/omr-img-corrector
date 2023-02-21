@@ -154,29 +154,32 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
     Ok(TransformableMat::new(mat))
 }
 
-/// TODO: 纵向投影性能过差，需要优化
 /// 提取黑白二值图的纵向投影数据
 #[allow(dead_code)]
 pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
     let mat = &src.mat;
 
-    let mut result = vec![];
+    let mut result = vec![0.0; mat.cols() as usize];
 
-    // 遍历每一列
-    for col_index in 0..mat.cols() {
-        let mut sum: usize = 0;
+    // 遍历每一行
+    for row_index in 0..mat.rows() {
+        // 获取当前行的数据数组
+        let row = mat.at_row::<u8>(row_index)?;
 
-        // 遍历每一行
-        for row_index in 0..mat.rows() {
-            // 获取指定位置的色块数值
-            // 如果为黑色则加一
-            if mat.at_row::<u8>(row_index)?[col_index as usize] == 0 {
-                sum += 1;
+        // 遍历当前行的每一个色块
+        for col_index in 0..src.mat.cols() {
+            // 如果为白色色块
+            // 不做处理
+            if row[col_index as usize] == 255 {
+                continue;
             }
-        }
 
-        result.push(sum as f64);
+            // 如果为黑色色块
+            // 总数加一
+            result[col_index as usize] += 1.0;
+        }
     }
+
     Ok(result)
 }
 
@@ -270,7 +273,7 @@ pub fn get_projection_standard_deviations(
     src: &TransformableMat,
 ) -> Result<(f64, f64), opencv::Error> {
     let vertical_standard_deviation =
-        calculate::get_standard_deviation(&self::get_horizontal_projection(src)?);
+        calculate::get_standard_deviation(&self::get_vertical_projection(src)?);
     let horizontal_standard_deviation =
         calculate::get_standard_deviation(&self::get_horizontal_projection(src)?);
 
