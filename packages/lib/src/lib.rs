@@ -1,15 +1,21 @@
-pub use opencv::{highgui, imgcodecs};
+pub use opencv::{core, highgui, imgcodecs, imgproc};
+
+pub mod calculate;
+
+pub mod constants;
 
 pub mod transfer;
 
 #[cfg(test)]
 mod tests {
+    use crate::constants::ImReadFlags;
+
     use super::*;
 
     #[test]
     fn it_works() {
         let mut image = transfer::TransformableMat::default();
-        let result = image.load_mat("./01234.jpg", imgcodecs::IMREAD_COLOR);
+        let result = image.load_mat("./01234.jpg", ImReadFlags::from(ImReadFlags::Color));
         match result {
             Err(_) => assert!(false),
             Ok(original_image) => {

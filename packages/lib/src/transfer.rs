@@ -1,9 +1,13 @@
 use std::collections::HashMap;
 
 use opencv::{
-    highgui, imgcodecs, imgproc,
+    core::{Point2f, Scalar},
+    highgui, imgcodecs,
+    imgproc::{self, get_rotation_matrix_2d, warp_affine},
     prelude::{Mat, MatTraitConst, MatTraitConstManual, MatTraitManual},
 };
+
+use crate::calculate;
 
 pub struct TransformableMat {
     mat: Mat,
@@ -75,10 +79,10 @@ pub fn transfer_gray_image_to_thresh_binary(
 
 /// 提取黑白二值图的横向投影数据
 #[allow(dead_code)]
-pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<usize>, opencv::Error> {
+pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
     let mat = &src.mat;
 
-    let mut result = vec![];
+    let mut result: Vec<f64> = vec![];
 
     // 遍历每一行
     for row_index in 0..mat.rows() {
@@ -86,7 +90,7 @@ pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<usize>, o
         let row = mat.at_row::<u8>(row_index)?;
 
         // 当前行黑色的色块总数
-        let mut sum: usize = 0;
+        let mut sum = 0;
 
         // 遍历当前行的每一个色块
         for col_index in 0..src.mat.cols() {
@@ -101,7 +105,7 @@ pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<usize>, o
             sum += 1;
         }
 
-        result.push(sum);
+        result.push(sum as f64);
     }
 
     Ok(result)
@@ -150,9 +154,10 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
     Ok(TransformableMat::new(mat))
 }
 
+/// TODO: 纵向投影性能过差，需要优化
 /// 提取黑白二值图的纵向投影数据
 #[allow(dead_code)]
-pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<usize>, opencv::Error> {
+pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
     let mat = &src.mat;
 
     let mut result = vec![];
@@ -170,9 +175,8 @@ pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<usize>, ope
             }
         }
 
-        result.push(sum);
+        result.push(sum as f64);
     }
-
     Ok(result)
 }
 
@@ -224,4 +228,51 @@ pub fn transfer_thresh_binary_to_vertical_projection(
     }
 
     Ok(TransformableMat::new(mat))
+}
+
+/// 旋转视图
+#[allow(dead_code)]
+pub fn rotate_mat(
+    src: &TransformableMat,
+    deg: f64,
+    flags: i32,
+    border_mode: i32,
+    border_value: Scalar,
+) -> Result<TransformableMat, opencv::Error> {
+    let mat = &src.mat;
+
+    let size = mat.size()?;
+
+    let mut center_pos = Point2f::default();
+    center_pos.x = (size.width as f32) / 2.0;
+    center_pos.y = (size.height as f32) / 2.0;
+
+    let rotate_matrix = get_rotation_matrix_2d(center_pos, deg, 1.0)?;
+
+    let mut dst = Mat::default();
+
+    warp_affine(
+        mat,
+        &mut dst,
+        &rotate_matrix,
+        size,
+        flags,
+        border_mode,
+        border_value,
+    )?;
+
+    Ok(TransformableMat::new(dst))
+}
+
+/// 获取投影曲线的垂直标准差和水平标准差
+#[allow(dead_code)]
+pub fn get_projection_standard_deviations(
+    src: &TransformableMat,
+) -> Result<(f64, f64), opencv::Error> {
+    let vertical_standard_deviation =
+        calculate::get_standard_deviation(&self::get_horizontal_projection(src)?);
+    let horizontal_standard_deviation =
+        calculate::get_standard_deviation(&self::get_horizontal_projection(src)?);
+
+    Ok((vertical_standard_deviation, horizontal_standard_deviation))
 }
