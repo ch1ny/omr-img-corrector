@@ -1,14 +1,17 @@
 use std::collections::HashMap;
 
 use opencv::{
-    core::{Point2f, Scalar},
+    core::{Point2f, Scalar, Size2f, Size2i, CV_PI},
     highgui, imgcodecs,
     imgproc::{self, get_rotation_matrix_2d, warp_affine},
-    prelude::{Mat, MatTraitConst, MatTraitConstManual, MatTraitManual},
+    prelude::{Mat, MatTrait, MatTraitConst, MatTraitConstManual, MatTraitManual},
     types::VectorOfi32,
 };
 
-use crate::{calculate, types::ImageFormat};
+use crate::{
+    calculate,
+    types::{ImageFormat, RotateClipStrategy},
+};
 
 pub struct TransformableMat {
     mat: Mat,
@@ -272,28 +275,61 @@ pub fn rotate_mat(
     flags: i32,
     border_mode: i32,
     border_value: Scalar,
+    clip_strategy: RotateClipStrategy,
 ) -> Result<TransformableMat, opencv::Error> {
     let mat = &src.mat;
-
-    let size = mat.size()?;
-
-    let mut center_pos = Point2f::default();
-    center_pos.x = (size.width as f32) / 2.0;
-    center_pos.y = (size.height as f32) / 2.0;
-
-    let rotate_matrix = get_rotation_matrix_2d(center_pos, angle, scale)?;
-
     let mut dst = Mat::default();
 
-    warp_affine(
-        mat,
-        &mut dst,
-        &rotate_matrix,
-        size,
-        flags,
-        border_mode,
-        border_value,
-    )?;
+    match clip_strategy {
+        RotateClipStrategy::DEFAULT => {
+            let size = mat.size()?;
+            let center_point = Point2f::new((size.width as f32) / 2.0, (size.height as f32) / 2.0);
+            let rotate_matrix = get_rotation_matrix_2d(center_point, angle, scale)?;
+
+            warp_affine(
+                mat,
+                &mut dst,
+                &rotate_matrix,
+                size,
+                flags,
+                border_mode,
+                border_value,
+            )?;
+        }
+        RotateClipStrategy::CONTAIN => {
+            // 计算旋转后的图像尺寸
+            let rotated_width = ((mat.rows() as f64) * (angle * CV_PI / 180.0).sin().abs()
+                + (mat.cols() as f64) * (angle * CV_PI / 180.0).cos().abs())
+            .ceil();
+            let rotated_height = ((mat.cols() as f64) * (angle * CV_PI / 180.0).sin().abs()
+                + (mat.rows() as f64) * (angle * CV_PI / 180.0).cos().abs())
+            .ceil();
+
+            // 计算仿射变换矩阵
+            let center_point = Point2f::from_size(Size2f::new(
+                (rotated_width / 2.0).ceil() as f32,
+                (rotated_height / 2.0).ceil() as f32,
+            ));
+            let mut rotate_matrix = get_rotation_matrix_2d(center_point, angle, scale).unwrap();
+
+            // 防止切边，对平移矩阵进行修改
+            let element = rotate_matrix.at_2d_mut::<f64>(0, 2).unwrap();
+            *element += ((rotated_width - mat.cols() as f64) / 2.0).ceil();
+            let element = rotate_matrix.at_2d_mut::<f64>(1, 2).unwrap();
+            *element += ((rotated_height - mat.rows() as f64) / 2.0).ceil();
+
+            // 应用仿射变换
+            warp_affine(
+                &mat,
+                &mut dst,
+                &rotate_matrix,
+                Size2i::new(rotated_width as i32, rotated_height as i32),
+                flags,
+                border_mode,
+                border_value,
+            )?;
+        }
+    }
 
     Ok(TransformableMat::new(dst))
 }
