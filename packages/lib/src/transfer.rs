@@ -310,12 +310,12 @@ pub fn rotate_mat(
                 (rotated_width / 2.0).ceil() as f32,
                 (rotated_height / 2.0).ceil() as f32,
             ));
-            let mut rotate_matrix = get_rotation_matrix_2d(center_point, angle, scale).unwrap();
+            let mut rotate_matrix = get_rotation_matrix_2d(center_point, angle, scale)?;
 
             // 防止切边，对平移矩阵进行修改
-            let element = rotate_matrix.at_2d_mut::<f64>(0, 2).unwrap();
+            let element = rotate_matrix.at_2d_mut::<f64>(0, 2)?;
             *element += ((rotated_width - mat.cols() as f64) / 2.0).ceil();
-            let element = rotate_matrix.at_2d_mut::<f64>(1, 2).unwrap();
+            let element = rotate_matrix.at_2d_mut::<f64>(1, 2)?;
             *element += ((rotated_height - mat.rows() as f64) / 2.0).ceil();
 
             // 应用仿射变换
