@@ -1,11 +1,16 @@
 use oics::{
     core::{self, Scalar},
-    imgcodecs, imgproc, transfer,
-    types::ImageFormat,
+    imgcodecs, imgproc,
+    transfer::{self, TransformableMat},
+    types::{ImageFormat, RotateClipStrategy},
 };
-use std::{collections::HashMap, env};
+use std::{
+    collections::HashMap,
+    env,
+    sync::{Arc, Mutex},
+    thread,
+};
 
-#[allow(dead_code)]
 fn get_most_possible_angle(vec: (Vec<f64>, Vec<f64>)) -> usize {
     // 处理垂直投影数据
     let vertical_vec = vec.0;
@@ -79,6 +84,99 @@ fn get_most_possible_angle(vec: (Vec<f64>, Vec<f64>)) -> usize {
     }
 }
 
+#[allow(dead_code)]
+fn sync_get_standard_deviations(
+    thresh_image: &TransformableMat,
+    max_angle: u16,
+) -> (Vec<f64>, Vec<f64>) {
+    let range = -(max_angle as i32)..(max_angle as i32);
+    let mut standard_deviations = (vec![], vec![]);
+
+    for deg in range {
+        let rotated_image = transfer::rotate_mat(
+            &thresh_image,
+            deg as f64,
+            1.0,
+            imgproc::INTER_LINEAR,
+            core::BORDER_CONSTANT,
+            Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
+            RotateClipStrategy::CONTAIN,
+        )
+        .expect("旋转图像时发生错误！");
+
+        let projection_standard_deviations =
+            transfer::get_projection_standard_deviations(&rotated_image)
+                .expect("计算投影标准差时发生错误");
+
+        standard_deviations.0.push(projection_standard_deviations.0);
+        standard_deviations.1.push(projection_standard_deviations.1);
+    }
+
+    standard_deviations
+}
+
+#[allow(dead_code)]
+fn multi_thread_get_standard_deviations(
+    arc_thresh_image: Arc<TransformableMat>,
+    max_angle: u16,
+    threads: usize,
+) -> (Vec<f64>, Vec<f64>) {
+    let min_angle = -(max_angle as i32);
+    let mut handles = vec![];
+    let index = Arc::new(Mutex::new(0));
+
+    let standard_deviations = Arc::new(Mutex::new((
+        vec![0.0; max_angle as usize * 2],
+        vec![0.0; max_angle as usize * 2],
+    )));
+    for _ in 0..threads {
+        let ref_standard_deviations = Arc::clone(&standard_deviations);
+        let ref_index = Arc::clone(&index);
+        let ref_thresh_image = Arc::clone(&arc_thresh_image);
+
+        let handle = thread::spawn(move || loop {
+            let angle = {
+                let mut index_locker = ref_index.lock().unwrap();
+                let current_index = *index_locker;
+                if current_index == (max_angle * 2) as i32 {
+                    break;
+                }
+                *index_locker = current_index + 1;
+                current_index + min_angle
+            };
+
+            let rotated_image = transfer::rotate_mat(
+                &ref_thresh_image,
+                angle as f64,
+                1.0,
+                imgproc::INTER_LINEAR,
+                core::BORDER_CONSTANT,
+                Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
+                RotateClipStrategy::CONTAIN,
+            )
+            .expect("旋转图像时发生错误！");
+
+            let projection_standard_deviations =
+                transfer::get_projection_standard_deviations(&rotated_image)
+                    .expect("计算投影标准差时发生错误");
+
+            {
+                let mut rsd = ref_standard_deviations.lock().unwrap();
+                rsd.0[(angle - min_angle) as usize] = projection_standard_deviations.0;
+                rsd.1[(angle - min_angle) as usize] = projection_standard_deviations.1;
+            }
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    let sd = standard_deviations.lock().unwrap().to_owned();
+    sd
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
@@ -96,35 +194,42 @@ fn main() {
     let thresh_image = transfer::transfer_gray_image_to_thresh_binary(&gray_image)
         .expect("灰度图二值化阈值处理失败");
 
-    let mut standard_deviations = (vec![], vec![]);
-    for deg in -45..45 {
-        let rotated_image = transfer::rotate_mat(
-            &thresh_image,
-            deg as f64,
-            1.0,
-            imgproc::WARP_INVERSE_MAP,
-            core::BORDER_CONSTANT,
-            Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
-        )
-        .expect("旋转图像时发生错误！");
+    // let mut standard_deviations = (vec![], vec![]);
+    // for deg in -250..250 {
+    //     let rotated_image = transfer::rotate_mat(
+    //         &thresh_image,
+    //         (deg as f64) / 10.0,
+    //         1.0,
+    //         imgproc::INTER_LINEAR,
+    //         core::BORDER_CONSTANT,
+    //         Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
+    //         RotateClipStrategy::CONTAIN,
+    //     )
+    //     .expect("旋转图像时发生错误！");
 
-        let projection_standard_deviations =
-            transfer::get_projection_standard_deviations(&rotated_image)
-                .expect("计算投影标准差时发生错误");
+    //     let projection_standard_deviations =
+    //         transfer::get_projection_standard_deviations(&rotated_image)
+    //             .expect("计算投影标准差时发生错误");
 
-        standard_deviations.0.push(projection_standard_deviations.0);
-        standard_deviations.1.push(projection_standard_deviations.1);
-    }
+    //     standard_deviations.0.push(projection_standard_deviations.0);
+    //     standard_deviations.1.push(projection_standard_deviations.1);
+    // }
+    // let target_angle = ((get_most_possible_angle(standard_deviations) as f64) - 250.0) / 10.0;
 
-    let target_angle = get_most_possible_angle(standard_deviations) as f64 - 45.0;
+    let max_angle = 45;
+    let standard_deviations =
+        multi_thread_get_standard_deviations(Arc::new(thresh_image), max_angle, 8);
+    // let standard_deviations = sync_get_standard_deviations(&thresh_image, max_angle);
+    let target_angle = (get_most_possible_angle(standard_deviations) as f64) - (max_angle as f64);
 
     let final_image = transfer::rotate_mat(
         &original_image,
         target_angle,
         1.0,
-        imgproc::WARP_INVERSE_MAP,
+        imgproc::INTER_LINEAR,
         core::BORDER_CONSTANT,
-        Scalar::new(255.0, 255.0, 255.0, 0.0),
+        Scalar::new(0.0, 0.0, 0.0, 0.0),
+        RotateClipStrategy::CONTAIN,
     )
     .expect("旋转图像时发生错误");
 
