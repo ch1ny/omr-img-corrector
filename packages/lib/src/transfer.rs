@@ -88,6 +88,8 @@ impl TransformableMat {
     }
 }
 
+unsafe impl Sync for TransformableMat {}
+
 /// 将RGB图片转换成灰度图
 #[allow(dead_code)]
 pub fn transfer_rgb_image_to_gray_image(
