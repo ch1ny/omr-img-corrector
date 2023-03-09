@@ -29,7 +29,7 @@ cargo build -r # release
 执行 run 指令运行程序
 
 ```bash
-cargo run -r -- "C:/Users/10563/Desktop/tomori_nao.png" # 参数为需要读取的文件
+cargo run -r -- "C:/Users/10563/Desktop/dzc.jpg" # 参数为需要读取的文件
 ```
 
 > 因为用了 `rust-analyze` 这个插件，导致 debug 期间经常乱编译，每次 `cargo build` 都需要重新链接编译 `opencv`。所以建议调试时也通过 **release** 运行。
