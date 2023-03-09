@@ -117,7 +117,7 @@ pub fn transfer_gray_image_to_thresh_binary(
 pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
     let mat = &src.mat;
 
-    let mut result: Vec<f64> = vec![];
+    let mut result: Vec<f64> = Vec::with_capacity(mat.rows() as usize);
 
     // 遍历每一行
     for row_index in 0..mat.rows() {
@@ -128,16 +128,14 @@ pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<f64>, ope
         let mut sum = 0;
 
         // 遍历当前行的每一个色块
-        for col_index in 0..src.mat.cols() {
-            // 如果为白色色块
-            // 不做处理
-            if row[col_index as usize] == 255 {
-                continue;
-            }
-
+        for item in row {
             // 如果为黑色色块
             // 总数加一
-            sum += 1;
+            // 如果为白色色块
+            // 不做处理
+            if *item == 0 {
+                sum += 1;
+            }
         }
 
         result.push(sum as f64);
@@ -202,16 +200,14 @@ pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<f64>, openc
         let row = mat.at_row::<u8>(row_index)?;
 
         // 遍历当前行的每一个色块
-        for col_index in 0..src.mat.cols() {
+        for (col_index, item) in row.iter().enumerate() {
             // 如果为白色色块
             // 不做处理
-            if row[col_index as usize] == 255 {
-                continue;
-            }
-
             // 如果为黑色色块
             // 总数加一
-            result[col_index as usize] += 1.0;
+            if *item == 0 {
+                result[col_index] += 1.0;
+            }
         }
     }
 
