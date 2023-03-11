@@ -1,7 +1,7 @@
 use oics::{
     core::{self, Scalar},
     imgcodecs, imgproc,
-    transfer::{self, TransformableMat},
+    transfer::{self, TransformableMatrix},
     types::{ImageFormat, RotateClipStrategy},
 };
 use std::{
@@ -75,7 +75,7 @@ fn get_most_possible_angle(vec: (Vec<f64>, Vec<f64>)) -> usize {
     }
 }
 
-fn find_target_angle(max_angle: u16, thresh_image: TransformableMat, threads: usize) -> f64 {
+fn find_target_angle(max_angle: u16, thresh_image: TransformableMatrix, threads: usize) -> f64 {
     let min_angle = -(max_angle as i32);
     let range = min_angle..(max_angle as i32);
 
@@ -138,7 +138,7 @@ fn find_target_angle(max_angle: u16, thresh_image: TransformableMat, threads: us
                     imgproc::WARP_POLAR_LINEAR,
                     core::BORDER_CONSTANT,
                     Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
-                    RotateClipStrategy::CONTAIN,
+                    RotateClipStrategy::DEFAULT,
                 )
                 .expect("旋转图像时发生错误！");
 
@@ -173,14 +173,12 @@ fn main() {
     }
 
     let instant = Instant::now();
-    let mut original_image = transfer::TransformableMat::default();
-    original_image
-        .load_mat(&args[1], imgcodecs::IMREAD_COLOR)
-        .expect("读取图片时发生错误");
 
     let thresh_image = {
-        let gray_image =
-            transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
+        // let gray_image =
+        //     transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
+        let gray_image = transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_GRAYSCALE)
+            .expect("读取图片时发生错误");
 
         transfer::transfer_gray_image_to_thresh_binary(&gray_image)
             .expect("灰度图二值化阈值处理失败")
@@ -212,6 +210,9 @@ fn main() {
 
     let duration = instant.elapsed().as_millis();
     println!("耗时 => {}ms", duration);
+
+    let original_image = transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_COLOR)
+        .expect("读取图片时发生错误");
 
     let final_image = transfer::rotate_mat(
         &original_image,
