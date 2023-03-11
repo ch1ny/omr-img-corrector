@@ -51,6 +51,33 @@ impl TransformableMatrix {
         Ok(Self { matrix })
     }
 
+    pub fn resize_self(self: &mut Self, scale: f64) -> Result<&mut Self, opencv::Error> {
+        if scale == 1.0 {
+            return Ok(self);
+        }
+
+        let mut dst = Mat::default();
+        let size = self.matrix.size()?;
+        imgproc::resize(
+            &self.matrix,
+            &mut dst,
+            Size2i::new(
+                ((size.width as f64) * scale) as i32,
+                ((size.height as f64) * scale) as i32,
+            ),
+            scale,
+            scale,
+            if scale > 1.0 {
+                imgproc::INTER_LINEAR
+            } else {
+                imgproc::INTER_AREA
+            },
+        )?;
+        self.matrix = dst;
+
+        Ok(self)
+    }
+
     /// 利用 opencv::highgui 窗口展示图片
     pub fn show(self: &Self, win_name: &str) -> Result<(), opencv::Error> {
         highgui::imshow(win_name, &self.matrix)?;
