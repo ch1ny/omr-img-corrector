@@ -177,8 +177,10 @@ fn main() {
     let thresh_image = {
         // let gray_image =
         //     transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
-        let gray_image = transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_GRAYSCALE)
-            .expect("读取图片时发生错误");
+        let mut gray_image =
+            transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_GRAYSCALE)
+                .expect("读取图片时发生错误");
+        let gray_image = gray_image.resize_self(0.5).unwrap();
 
         transfer::transfer_gray_image_to_thresh_binary(&gray_image)
             .expect("灰度图二值化阈值处理失败")
