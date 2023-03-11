@@ -42,8 +42,13 @@ impl TransformableMatrix {
         &self.matrix
     }
 
-    pub fn new(mat: Mat) -> Self {
+    pub fn from_matrix(mat: Mat) -> Self {
         Self { matrix: mat }
+    }
+
+    pub fn new(filename: &str, flags: i32) -> Result<Self, opencv::Error> {
+        let matrix = imgcodecs::imread(filename, flags)?;
+        Ok(Self { matrix })
     }
 
     /// 利用 opencv::highgui 窗口展示图片
@@ -90,7 +95,7 @@ pub fn transfer_rgb_image_to_gray_image(
     let mut dst = Mat::default();
     imgproc::cvt_color(&src.matrix, &mut dst, imgproc::COLOR_RGB2GRAY, 0)?;
 
-    Ok(TransformableMatrix::new(dst))
+    Ok(TransformableMatrix::from_matrix(dst))
 }
 
 /// 将灰度图转换成黑白二值图
@@ -101,7 +106,7 @@ pub fn transfer_gray_image_to_thresh_binary(
     let mut dst = Mat::default();
     imgproc::threshold(&src.matrix, &mut dst, 127.0, 255.0, imgproc::THRESH_BINARY)?;
 
-    Ok(TransformableMatrix::new(dst))
+    Ok(TransformableMatrix::from_matrix(dst))
 }
 
 /// 提取黑白二值图的横向投影数据
@@ -176,7 +181,7 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
         }
     }
 
-    Ok(TransformableMatrix::new(mat))
+    Ok(TransformableMatrix::from_matrix(mat))
 }
 
 /// 提取黑白二值图的纵向投影数据
@@ -253,7 +258,7 @@ pub fn transfer_thresh_binary_to_vertical_projection(
         }
     }
 
-    Ok(TransformableMatrix::new(mat))
+    Ok(TransformableMatrix::from_matrix(mat))
 }
 
 /// 旋转视图
@@ -321,7 +326,7 @@ pub fn rotate_mat(
         }
     }
 
-    Ok(TransformableMatrix::new(dst))
+    Ok(TransformableMatrix::from_matrix(dst))
 }
 
 /// 获取投影曲线的垂直标准差和水平标准差
