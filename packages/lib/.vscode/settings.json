@@ -11,6 +11,7 @@
 		"imgproc",
 		"imread",
 		"imshow",
+		"IMWRITE",
 		"ml",
 		"objdetect",
 		"oics",

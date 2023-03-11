@@ -13,14 +13,14 @@ use crate::{
     types::{ImageFormat, RotateClipStrategy},
 };
 
-pub struct TransformableMat {
-    mat: Mat,
+pub struct TransformableMatrix {
+    matrix: Mat,
 }
-impl TransformableMat {
+impl TransformableMatrix {
     /// 生成默认 Mat 对象
     pub fn default() -> Self {
         Self {
-            mat: Mat::default(),
+            matrix: Mat::default(),
         }
     }
 
@@ -31,7 +31,7 @@ impl TransformableMat {
         flags: i32,
     ) -> Result<&mut Self, opencv::Error> {
         let image = imgcodecs::imread(filename, flags)?;
-        self.mat = image;
+        self.matrix = image;
 
         Ok(self)
     }
@@ -39,23 +39,23 @@ impl TransformableMat {
     /// getter mat
     #[allow(dead_code)]
     pub fn get_mat(self: &Self) -> &Mat {
-        &self.mat
+        &self.matrix
     }
 
     pub fn new(mat: Mat) -> Self {
-        Self { mat }
+        Self { matrix: mat }
     }
 
     /// 利用 opencv::highgui 窗口展示图片
     pub fn show(self: &Self, win_name: &str) -> Result<(), opencv::Error> {
-        highgui::imshow(win_name, &self.mat)?;
+        highgui::imshow(win_name, &self.matrix)?;
         Ok(())
     }
 
     /// 获取 mat 字节数组
     #[allow(dead_code)]
     pub fn get_bytes(self: &Self) -> Result<&[u8], opencv::Error> {
-        self.mat.data_bytes()
+        self.matrix.data_bytes()
     }
 
     /// 将图像自身输出到指定位置
@@ -66,7 +66,7 @@ impl TransformableMat {
         format: ImageFormat,
         quality: i32,
     ) -> Result<bool, opencv::Error> {
-        let mat = &self.mat;
+        let mat = &self.matrix;
 
         let quality_vec = match format {
             ImageFormat::JPEG => VectorOfi32::from(vec![imgcodecs::IMWRITE_JPEG_QUALITY, quality]),
@@ -80,34 +80,34 @@ impl TransformableMat {
     }
 }
 
-unsafe impl Sync for TransformableMat {}
+unsafe impl Sync for TransformableMatrix {}
 
 /// 将RGB图片转换成灰度图
 #[allow(dead_code)]
 pub fn transfer_rgb_image_to_gray_image(
-    src: &TransformableMat,
-) -> Result<TransformableMat, opencv::Error> {
+    src: &TransformableMatrix,
+) -> Result<TransformableMatrix, opencv::Error> {
     let mut dst = Mat::default();
-    imgproc::cvt_color(&src.mat, &mut dst, imgproc::COLOR_RGB2GRAY, 0)?;
+    imgproc::cvt_color(&src.matrix, &mut dst, imgproc::COLOR_RGB2GRAY, 0)?;
 
-    Ok(TransformableMat::new(dst))
+    Ok(TransformableMatrix::new(dst))
 }
 
 /// 将灰度图转换成黑白二值图
 #[allow(dead_code)]
 pub fn transfer_gray_image_to_thresh_binary(
-    src: &TransformableMat,
-) -> Result<TransformableMat, opencv::Error> {
+    src: &TransformableMatrix,
+) -> Result<TransformableMatrix, opencv::Error> {
     let mut dst = Mat::default();
-    imgproc::threshold(&src.mat, &mut dst, 127.0, 255.0, imgproc::THRESH_BINARY)?;
+    imgproc::threshold(&src.matrix, &mut dst, 127.0, 255.0, imgproc::THRESH_BINARY)?;
 
-    Ok(TransformableMat::new(dst))
+    Ok(TransformableMatrix::new(dst))
 }
 
 /// 提取黑白二值图的横向投影数据
 #[allow(dead_code)]
-pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
-    let mat = &src.mat;
+pub fn get_horizontal_projection(src: &TransformableMatrix) -> Result<Vec<f64>, opencv::Error> {
+    let mat = &src.matrix;
 
     let mut result: Vec<f64> = Vec::with_capacity(mat.rows() as usize);
 
@@ -139,10 +139,10 @@ pub fn get_horizontal_projection(src: &TransformableMat) -> Result<Vec<f64>, ope
 /// 将黑白二值图转换为横向投影图
 #[allow(dead_code)]
 pub fn transfer_thresh_binary_to_horizontal_projection(
-    src: &TransformableMat,
-) -> Result<TransformableMat, opencv::Error> {
+    src: &TransformableMatrix,
+) -> Result<TransformableMatrix, opencv::Error> {
     // 克隆原图作为目标图片
-    let mut mat = (&src.mat).clone();
+    let mut mat = (&src.matrix).clone();
 
     // 遍历每一行
     for row_index in 0..mat.rows() {
@@ -155,7 +155,7 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
         let mut flag = false;
 
         // 遍历当前行的每一个色块
-        for col_index in 0..src.mat.cols() {
+        for col_index in 0..src.matrix.cols() {
             // 如果为白色色块
             // 将 flag 置为 true
             // 不做其他处理
@@ -176,13 +176,13 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
         }
     }
 
-    Ok(TransformableMat::new(mat))
+    Ok(TransformableMatrix::new(mat))
 }
 
 /// 提取黑白二值图的纵向投影数据
 #[allow(dead_code)]
-pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<f64>, opencv::Error> {
-    let mat = &src.mat;
+pub fn get_vertical_projection(src: &TransformableMatrix) -> Result<Vec<f64>, opencv::Error> {
+    let mat = &src.matrix;
 
     let mut result = vec![0.0; mat.cols() as usize];
 
@@ -209,10 +209,10 @@ pub fn get_vertical_projection(src: &TransformableMat) -> Result<Vec<f64>, openc
 /// 将黑白二值图转换为纵向投影图
 #[allow(dead_code)]
 pub fn transfer_thresh_binary_to_vertical_projection(
-    src: &TransformableMat,
-) -> Result<TransformableMat, opencv::Error> {
+    src: &TransformableMatrix,
+) -> Result<TransformableMatrix, opencv::Error> {
     // 克隆原图作为目标图片
-    let mut mat = (&src.mat).clone();
+    let mut mat = (&src.matrix).clone();
 
     // 记录每一列中的黑点个数及对应的列数
     let mut col_black_counts: HashMap<i32, Vec<usize>> = HashMap::new();
@@ -253,21 +253,21 @@ pub fn transfer_thresh_binary_to_vertical_projection(
         }
     }
 
-    Ok(TransformableMat::new(mat))
+    Ok(TransformableMatrix::new(mat))
 }
 
 /// 旋转视图
 #[allow(dead_code)]
 pub fn rotate_mat(
-    src: &TransformableMat,
+    src: &TransformableMatrix,
     angle: f64,
     scale: f64,
     flags: i32,
     border_mode: i32,
     border_value: Scalar,
     clip_strategy: RotateClipStrategy,
-) -> Result<TransformableMat, opencv::Error> {
-    let mat = &src.mat;
+) -> Result<TransformableMatrix, opencv::Error> {
+    let mat = &src.matrix;
     let mut dst = Mat::default();
 
     match clip_strategy {
@@ -321,13 +321,13 @@ pub fn rotate_mat(
         }
     }
 
-    Ok(TransformableMat::new(dst))
+    Ok(TransformableMatrix::new(dst))
 }
 
 /// 获取投影曲线的垂直标准差和水平标准差
 #[allow(dead_code)]
 pub fn get_projection_standard_deviations(
-    src: &TransformableMat,
+    src: &TransformableMatrix,
 ) -> Result<(f64, f64), opencv::Error> {
     let vertical_standard_deviation =
         calculate::get_standard_deviation(&self::get_vertical_projection(src)?);

@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let mut image = transfer::TransformableMat::default();
+        let mut image = transfer::TransformableMatrix::default();
         let result = image.load_mat("./01234.jpg", ImReadFlags::from(ImReadFlags::Color));
         match result {
             Err(_) => assert!(false),

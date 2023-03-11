@@ -178,11 +178,13 @@ fn main() {
         .load_mat(&args[1], imgcodecs::IMREAD_COLOR)
         .expect("读取图片时发生错误");
 
-    let gray_image =
-        transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
+    let thresh_image = {
+        let gray_image =
+            transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
 
-    let thresh_image = transfer::transfer_gray_image_to_thresh_binary(&gray_image)
-        .expect("灰度图二值化阈值处理失败");
+        transfer::transfer_gray_image_to_thresh_binary(&gray_image)
+            .expect("灰度图二值化阈值处理失败")
+    };
 
     // let mut standard_deviations = (vec![], vec![]);
     // for deg in -250..250 {
