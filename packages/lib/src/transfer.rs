@@ -68,20 +68,12 @@ impl TransformableMat {
     ) -> Result<bool, opencv::Error> {
         let mat = &self.mat;
 
-        let mut quality_vec = VectorOfi32::with_capacity(2);
-        match format {
-            ImageFormat::JPEG => {
-                quality_vec.push(imgcodecs::IMWRITE_JPEG_QUALITY);
-                quality_vec.push(quality);
-            }
+        let quality_vec = match format {
+            ImageFormat::JPEG => VectorOfi32::from(vec![imgcodecs::IMWRITE_JPEG_QUALITY, quality]),
             ImageFormat::PNG => {
-                quality_vec.push(imgcodecs::IMWRITE_PNG_COMPRESSION);
-                quality_vec.push(quality);
+                VectorOfi32::from(vec![imgcodecs::IMWRITE_PNG_COMPRESSION, quality])
             }
-            ImageFormat::WEBP => {
-                quality_vec.push(imgcodecs::IMWRITE_WEBP_QUALITY);
-                quality_vec.push(quality);
-            }
+            ImageFormat::WEBP => VectorOfi32::from(vec![imgcodecs::IMWRITE_WEBP_QUALITY, quality]),
         };
 
         return imgcodecs::imwrite(filename, mat, &quality_vec);
