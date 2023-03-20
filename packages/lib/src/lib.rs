@@ -4,6 +4,8 @@ pub mod calculate;
 
 pub mod constants;
 
+pub mod hough;
+
 pub mod transfer;
 
 pub mod types;

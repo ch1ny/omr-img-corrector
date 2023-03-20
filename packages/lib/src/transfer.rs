@@ -110,6 +110,12 @@ impl TransformableMatrix {
 
         return imgcodecs::imwrite(filename, mat, &quality_vec);
     }
+
+    pub fn clone(&self) -> Self {
+        Self {
+            matrix: self.matrix.clone(),
+        }
+    }
 }
 
 unsafe impl Sync for TransformableMatrix {}
