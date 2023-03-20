@@ -32,7 +32,7 @@ pub fn get_angle_with_hough(
         1.0,
         std::f64::consts::PI / 180.0,
         // 指定阈值
-        3,
+        0,
         // 检测的直线最小长度
         min_line_length,
         // 检测直线之间的最大间隙
@@ -60,7 +60,14 @@ pub fn get_angle_with_hough(
             0,
         )?;
 
-        let angle = (pt2.y - pt1.y).atan2(pt2.x - pt1.x) * 180.0 / std::f32::consts::PI;
+        let mut angle = (pt2.y - pt1.y).atan2(pt2.x - pt1.x) * 180.0 / std::f32::consts::PI;
+
+        // 限制偏转角度在 -45deg ~ +45deg 之间
+        if angle < -45.0 {
+            angle = angle + 90.0;
+        } else if angle > 45.0 {
+            angle = angle - 90.0;
+        }
         angles.push(angle);
     }
 
@@ -82,13 +89,6 @@ pub fn get_angle_with_hough(
             target_angle = angles[i];
             target_angle_lines_count = count;
         }
-    }
-
-    // 限制偏转角度在 -45deg ~ +45deg 之间
-    if target_angle < -45.0 {
-        target_angle = target_angle + 90.0;
-    } else if target_angle > 45.0 {
-        target_angle = target_angle - 90.0;
     }
 
     // 将角度转换为旋转矩阵
