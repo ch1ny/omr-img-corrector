@@ -28,7 +28,7 @@ pub fn get_angle_with_fft(gray_tm: &TransformableMatrix) -> Result<f64, opencv::
     let theta = PI / 180.0;
     let threshold = 100;
 
-    hough_lines_p(&edges, &mut lines, rho, theta, threshold, 50.0, 10.0)?;
+    hough_lines_p(&edges, &mut lines, rho, theta, threshold, 125.0, 5.0)?;
 
     // 计算所有直线的斜率，并选择斜率最接近垂直方向的直线
 
@@ -61,9 +61,9 @@ pub fn get_angle_with_fft(gray_tm: &TransformableMatrix) -> Result<f64, opencv::
             let y1_j = line_j[1] as f64;
             let x2_j = line_j[2] as f64;
             let y2_j = line_j[3] as f64;
-            let angle_j = ((y2_j - y1_j).atan2(x2_j - x1_j) * 180.0) as f64 / PI;
+            let angle_j = ((y2_j - y1_j).atan2(x2_j - x1_j) * 180.0) / PI;
             let distance = (angle_j - angle).abs();
-            if distance < 5.0 {
+            if distance < 0.1 {
                 votes += 1;
             }
         }

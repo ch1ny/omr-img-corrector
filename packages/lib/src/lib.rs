@@ -1,4 +1,4 @@
-pub use opencv::{core, highgui, imgcodecs, imgproc};
+pub use opencv::{core, highgui, imgcodecs, imgproc, prelude};
 
 pub mod calculate;
 

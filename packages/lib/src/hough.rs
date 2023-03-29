@@ -1,9 +1,10 @@
 use crate::transfer::TransformableMatrix;
 use opencv::{
     core::{Point, Point2f, Scalar},
-    imgproc::{self, canny, cvt_color, get_rotation_matrix_2d, hough_lines_p, line, warp_affine},
-    prelude::{Mat, MatTraitConstManual},
-    types::VectorOfVec4f,
+    imgcodecs,
+    imgproc::{self, canny, cvt_color, hough_lines_p, line},
+    prelude::Mat,
+    types::{VectorOfVec4f, VectorOfi32},
 };
 
 /// ### 利用霍夫变换查找偏转角
@@ -17,9 +18,9 @@ pub fn get_angle_with_hough(
     gray_tm: &TransformableMatrix,
     min_line_length: f64,
     max_line_gap: f64,
+    file_name: &str,
 ) -> Result<f64, opencv::Error> {
     let mat = gray_tm.get_mat();
-    let size = mat.size()?;
 
     let mut edges = Mat::default();
     canny(mat, &mut edges, 50.0, 150.0, 3, false)?;
@@ -61,7 +62,6 @@ pub fn get_angle_with_hough(
         )?;
 
         let mut angle = (pt2.y - pt1.y).atan2(pt2.x - pt1.x) * 180.0 / std::f32::consts::PI;
-
         // 限制偏转角度在 -45deg ~ +45deg 之间
         if angle < -45.0 {
             angle = angle + 90.0;
@@ -72,12 +72,12 @@ pub fn get_angle_with_hough(
     }
 
     // 找到最常出现的斜率作为图像的旋转角度
-    let range = 5.0;
+    let range = 0.1;
     // 目标角度
     let mut target_angle = angles[0];
     // 处于目标角度的直线数目
     let mut target_angle_lines_count = 0;
-    // 找寻目标角度线段数最多的角度作为最终的偏转角度
+    // 找寻目标角度线段总长度最大的角度作为最终的偏转角度
     for i in 0..angles.len() {
         let mut count = 0;
         for j in 0..angles.len() {
@@ -91,26 +91,12 @@ pub fn get_angle_with_hough(
         }
     }
 
-    // 将角度转换为旋转矩阵
-    let center = Point2f::new(
-        (size.width - 1) as f32 / 2.0,
-        (size.height - 1) as f32 / 2.0,
-    );
-    let rotation_matrix = get_rotation_matrix_2d(center, target_angle.into(), 1.0)?; // 在输出图像中展示旋转结果
-    let mut output = Mat::default();
-    warp_affine(
-        &mat,
-        &mut output,
-        &rotation_matrix,
-        size,
-        opencv::imgproc::INTER_LINEAR,
-        opencv::core::BORDER_CONSTANT,
-        opencv::core::Scalar::default(),
-    )?;
-
-    opencv::highgui::imshow("output", &output)?;
-    opencv::highgui::imshow("lined_img", &lined_img)?;
-    opencv::highgui::wait_key(0)?;
+    imgcodecs::imwrite(
+        &(String::from("C:/Users/10563/Desktop/result/edges/") + file_name),
+        &lined_img,
+        &VectorOfi32::from(vec![imgcodecs::IMWRITE_JPEG_QUALITY, 100]),
+    )
+    .unwrap();
 
     // 返回旋转角度 target_angle
     Ok(target_angle as f64)
