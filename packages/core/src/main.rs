@@ -1,12 +1,16 @@
 use oics::{
+    self,
     core::{self, Scalar},
-    imgcodecs, imgproc,
+    imgcodecs,
+    imgproc,
+    // prelude::MatTraitConstManual,
     transfer::{self, TransformableMatrix},
     types::{ImageFormat, RotateClipStrategy},
 };
+use rand::Rng;
 use std::{
     collections::HashMap,
-    env,
+    path::Path,
     sync::{Arc, Mutex},
     thread,
     time::Instant,
@@ -75,7 +79,13 @@ fn get_most_possible_angle(vec: (Vec<f64>, Vec<f64>)) -> usize {
     }
 }
 
-fn find_target_angle(max_angle: u16, thresh_image: TransformableMatrix, threads: usize) -> f64 {
+fn find_target_angle(
+    max_angle: u16,
+    step: f64,
+    thresh_image: TransformableMatrix,
+    threads: usize,
+) -> f64 {
+    let max_angle = (max_angle as f64 / step) as u16;
     let min_angle = -(max_angle as i32);
     let range = min_angle..(max_angle as i32);
 
@@ -89,7 +99,7 @@ fn find_target_angle(max_angle: u16, thresh_image: TransformableMatrix, threads:
         for deg in range {
             let rotated_image = transfer::rotate_mat(
                 &thresh_image,
-                deg as f64,
+                deg as f64 * step,
                 1.0,
                 imgproc::WARP_POLAR_LINEAR,
                 core::BORDER_CONSTANT,
@@ -163,71 +173,224 @@ fn find_target_angle(max_angle: u16, thresh_image: TransformableMatrix, threads:
         sd
     };
 
-    return (get_most_possible_angle(standard_deviations) as f64) - (max_angle as f64);
+    return ((get_most_possible_angle(standard_deviations) as f64) - (max_angle as f64)) * step;
+}
+
+const DATA_SET_DIR_PATH: &str = "C:/Users/10563/Desktop/dataset";
+fn run_test(p: bool, h: bool, f: bool) {
+    let instant = Instant::now();
+    let mut random = rand::thread_rng();
+
+    // 基准测试
+    let mut projection_run_time_array: Vec<u128> = vec![];
+    let mut hough_run_time_array: Vec<u128> = vec![];
+    let mut fft_run_time_array: Vec<u128> = vec![];
+    // 准确度测试
+    let mut projection_deviation_array: Vec<f64> = vec![];
+    let mut hough_deviation_array: Vec<f64> = vec![];
+    let mut fft_deviation_array: Vec<f64> = vec![];
+
+    for entry in walkdir::WalkDir::new(DATA_SET_DIR_PATH) {
+        let this_entry = entry.unwrap();
+        if !this_entry.metadata().unwrap().is_file() {
+            continue;
+        }
+
+        let filepath = this_entry.path().display();
+        let input_file_path = &filepath.to_string();
+        let file_name = this_entry.file_name().to_str().unwrap();
+
+        let random_angle = random.gen_range(-10.0..10.0);
+        let original_image = transfer::rotate_mat(
+            &transfer::TransformableMatrix::new(input_file_path, imgcodecs::IMREAD_COLOR).unwrap(),
+            -random_angle,
+            1.0,
+            imgproc::INTER_LINEAR,
+            core::BORDER_CONSTANT,
+            Scalar::new(255.0, 255.0, 255.0, 0.0),
+            RotateClipStrategy::DEFAULT,
+        )
+        .unwrap();
+
+        if p {
+            let projection_start = instant.elapsed().as_millis();
+            let thresh_image = {
+                let mut gray_image =
+                    transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+                let gray_image = gray_image.resize_self(0.2).unwrap();
+
+                transfer::transfer_gray_image_to_thresh_binary(&gray_image).unwrap()
+            };
+
+            let projection_angle = find_target_angle(45, 0.2, thresh_image.clone(), 1);
+
+            let final_image = transfer::rotate_mat(
+                &original_image,
+                projection_angle,
+                1.0,
+                imgproc::INTER_LINEAR,
+                core::BORDER_CONSTANT,
+                Scalar::new(255.0, 255.0, 255.0, 0.0),
+                RotateClipStrategy::CONTAIN,
+            )
+            .unwrap();
+
+            final_image
+                .im_write(
+                    Path::new("C:/Users/10563/Desktop/result/projection")
+                        .join(file_name)
+                        .to_str()
+                        .unwrap(),
+                    ImageFormat::JPEG,
+                    100,
+                )
+                .unwrap();
+
+            let projection_end = instant.elapsed().as_millis();
+            projection_run_time_array.push(projection_end - projection_start);
+            projection_deviation_array.push((projection_angle - random_angle).abs());
+        }
+
+        if h {
+            let hough_start = instant.elapsed().as_millis();
+            // let min_line_length = original_image.get_mat().size().unwrap().width as f64 * 0.1;
+            // let max_line_gap = min_line_length * 0.1;
+            let hough_angle = oics::hough::get_angle_with_hough(
+                &transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap(),
+                125.0,
+                15.0,
+                file_name,
+            )
+            .unwrap();
+            transfer::rotate_mat(
+                &original_image,
+                hough_angle,
+                1.0,
+                imgproc::INTER_LINEAR,
+                core::BORDER_CONSTANT,
+                Scalar::new(255.0, 255.0, 255.0, 0.0),
+                RotateClipStrategy::CONTAIN,
+            )
+            .unwrap()
+            .im_write(
+                Path::new("C:/Users/10563/Desktop/result/hough")
+                    .join(file_name)
+                    .to_str()
+                    .unwrap(),
+                ImageFormat::JPEG,
+                100,
+            )
+            .unwrap();
+
+            let hough_end = instant.elapsed().as_millis();
+            hough_run_time_array.push(hough_end - hough_start);
+            hough_deviation_array.push((hough_angle - random_angle).abs());
+        }
+
+        if f {
+            let fft_start = instant.elapsed().as_millis();
+
+            let fft_angle = oics::fft::get_angle_with_fft(&original_image).unwrap();
+            transfer::rotate_mat(
+                &original_image,
+                fft_angle,
+                1.0,
+                imgproc::INTER_LINEAR,
+                core::BORDER_CONSTANT,
+                Scalar::new(255.0, 255.0, 255.0, 0.0),
+                RotateClipStrategy::CONTAIN,
+            )
+            .unwrap()
+            .im_write(
+                Path::new("C:/Users/10563/Desktop/result/fft")
+                    .join(file_name)
+                    .to_str()
+                    .unwrap(),
+                ImageFormat::JPEG,
+                100,
+            )
+            .unwrap();
+
+            let fft_end = instant.elapsed().as_millis();
+            fft_run_time_array.push(fft_end - fft_start);
+            fft_deviation_array.push((fft_angle - random_angle).abs());
+        }
+    }
+
+    println!("基准测试");
+    if p {
+        println!("{}", {
+            let len = projection_run_time_array.len();
+            projection_run_time_array.iter().sum::<u128>() / (len as u128)
+        });
+    }
+    if h {
+        println!("{:?}", {
+            let len = hough_run_time_array.len();
+            hough_run_time_array.iter().sum::<u128>() / (len as u128)
+        });
+    }
+    if f {
+        println!("{:?}", {
+            let len = fft_run_time_array.len();
+            fft_run_time_array.iter().sum::<u128>() / (len as u128)
+        });
+    }
+
+    println!("误差测试");
+    if p {
+        println!(
+            "{}, {}, {}",
+            oics::calculate::get_arithmetic_mean(&projection_deviation_array),
+            oics::calculate::get_standard_deviation(&projection_deviation_array),
+            {
+                let mut largest = projection_deviation_array[0];
+                for val in projection_deviation_array {
+                    if val > largest {
+                        largest = val;
+                    }
+                }
+
+                largest
+            }
+        );
+    }
+    if h {
+        println!(
+            "{}, {}, {}",
+            oics::calculate::get_arithmetic_mean(&hough_deviation_array),
+            oics::calculate::get_standard_deviation(&hough_deviation_array),
+            {
+                let mut largest = hough_deviation_array[0];
+                for val in hough_deviation_array {
+                    if val > largest {
+                        largest = val;
+                    }
+                }
+
+                largest
+            }
+        );
+    }
+    if f {
+        println!(
+            "{}, {}, {}",
+            oics::calculate::get_arithmetic_mean(&fft_deviation_array),
+            oics::calculate::get_standard_deviation(&fft_deviation_array),
+            {
+                let mut largest = fft_deviation_array[0];
+                for val in fft_deviation_array {
+                    if val > largest {
+                        largest = val;
+                    }
+                }
+
+                largest
+            }
+        );
+    }
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        panic!("参数数目有误！");
-    }
-
-    let instant = Instant::now();
-
-    let thresh_image = {
-        // let gray_image =
-        //     transfer::transfer_rgb_image_to_gray_image(&original_image).expect("RGB图转灰度图失败");
-        let mut gray_image =
-            transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_GRAYSCALE)
-                .expect("读取图片时发生错误");
-        let gray_image = gray_image.resize_self(0.5).unwrap();
-
-        transfer::transfer_gray_image_to_thresh_binary(&gray_image)
-            .expect("灰度图二值化阈值处理失败")
-    };
-
-    // let mut standard_deviations = (vec![], vec![]);
-    // for deg in -250..250 {
-    //     let rotated_image = transfer::rotate_mat(
-    //         &thresh_image,
-    //         (deg as f64) / 10.0,
-    //         1.0,
-    //         imgproc::WARP_POLAR_LINEAR,
-    //         core::BORDER_CONSTANT,
-    //         Scalar::new(255.0, 255.0, 255.0, 0.0), // b g r
-    //         RotateClipStrategy::CONTAIN,
-    //     )
-    //     .expect("旋转图像时发生错误！");
-
-    //     let projection_standard_deviations =
-    //         transfer::get_projection_standard_deviations(&rotated_image)
-    //             .expect("计算投影标准差时发生错误");
-
-    //     standard_deviations.0.push(projection_standard_deviations.0);
-    //     standard_deviations.1.push(projection_standard_deviations.1);
-    // }
-    // let target_angle = ((get_most_possible_angle(standard_deviations) as f64) - 250.0) / 10.0;
-
-    let target_angle = find_target_angle(45, thresh_image, 1);
-
-    let duration = instant.elapsed().as_millis();
-    println!("耗时 => {}ms", duration);
-
-    let original_image = transfer::TransformableMatrix::new(&args[1], imgcodecs::IMREAD_COLOR)
-        .expect("读取图片时发生错误");
-
-    let final_image = transfer::rotate_mat(
-        &original_image,
-        target_angle,
-        1.0,
-        imgproc::WARP_POLAR_LINEAR,
-        core::BORDER_CONSTANT,
-        Scalar::new(0.0, 0.0, 0.0, 0.0),
-        RotateClipStrategy::CONTAIN,
-    )
-    .expect("旋转图像时发生错误");
-
-    final_image
-        .im_write("C:/Users/10563/Desktop/result.jpg", ImageFormat::JPEG, 100)
-        .expect("图像输出失败");
+    run_test(true, true, true);
 }

@@ -1,12 +1,14 @@
 {
 	"cSpell.words": [
 		"calib3d",
+		"consts",
 		"core",
 		"dnn",
 		"features2d",
 		"flann",
 		"gapi",
 		"highgui",
+		"imdecode",
 		"imgcodecs",
 		"imgproc",
 		"imread",
