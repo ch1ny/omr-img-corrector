@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Loading OMR Corrector...</title>
+		<style>
+			@font-face {
+				font-family: 'slogan';
+				src: url('/splash-slogan.ttf');
+			}
+
+			* {
+				margin: 0%;
+				padding: 0%;
+				position: relative;
+				user-select: none;
+			}
+
+			body {
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background: none;
+			}
+
+			#main {
+				width: calc(100% - 4px);
+				height: calc(100% - 4px);
+				box-shadow: 0 0 2px #cacaca;
+				background-color: #fafafa;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+			}
+
+			#logoWrapper {
+				width: 30vw;
+				height: 30vw;
+				display: flex;
+				justify-content: center;
+				transform: scale(1.5);
+			}
+
+			#logo {
+				width: 100%;
+				height: 100%;
+			}
+
+			#slogan {
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				font-size: 1.75rem;
+				height: 5rem;
+				font-family: 'slogan';
+			}
+		</style>
+		<!-- slogan 跳动 -->
+		<style>
+			#slogan span {
+        min-width: 0.5em;
+				/* 内联元素（inline）动画不起作用， 因此要设置为‘inline-block’ */
+				display: inline-block;
+        animation-name: jump;
+        animation-duration: 3000ms;
+        animation-iteration-count: infinite;
+				animation-delay: var(--delay);
+			}
+
+
+			@keyframes jump {
+        0%, 16% {
+					transform: translateY(0);
+        }
+				8% {
+					transform: translateY(-10px);
+				}
+			}
+		</style>
+		<!-- 加载动画 -->
+		<style>
+			#reverse-spinner {
+				height: 15vw;
+				width: 15vw;
+				border: 4px solid transparent;
+				border-radius: 50%;
+				background-clip: padding-box, border-box;
+				background-origin: padding-box, border-box;
+				background-image: linear-gradient(to right, #fff, #fff),
+					linear-gradient(to right, #9708cc 0%, #6088ee 50%, #fff 51%);
+				animation: spin 1.5s linear infinite;
+			}
+
+			#reverse-spinner::before {
+				position: absolute;
+				top: 15%;
+				left: 15%;
+				right: 15%;
+				bottom: 15%;
+				content: '';
+				border: 4px solid transparent;
+				border-radius: 50%;
+				background-clip: padding-box, border-box;
+				background-origin: padding-box, border-box;
+				background-image: linear-gradient(to right, #fff, #fff),
+					linear-gradient(to right, #6088ee 0%, #43cbff 50%, #fff 51%);
+				animation: spinBack 1s linear infinite;
+			}
+
+			@keyframes spin {
+				from {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				to {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+
+			@keyframes spinBack {
+				from {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				to {
+					-webkit-transform: rotate(-720deg);
+					transform: rotate(-720deg);
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="main">
+			<div id="logoWrapper">
+				<img src="/logo.png" id="logo" />
+			</div>
+			<div id="slogan"></div>
+			<div>
+				<div id="reverse-spinner"></div>
+			</div>
+		</div>
+	</body>
+
+	<footer>
+		<script>
+			window.addEventListener('load', () => {
+				const sloganWrapper = document.querySelector('#slogan');
+				const sloganText = 'OMR Corrector Loading...';
+				sloganText.split('').forEach((char, idx) => {
+					const span = document.createElement('span');
+					span.innerText = char;
+					sloganWrapper.appendChild(span);
+          span.style.setProperty("--delay", `${idx * 100}ms`);
+				});
+			});
+		</script>
+	</footer>
+</html>

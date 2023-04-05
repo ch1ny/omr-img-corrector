@@ -1,0 +1,71 @@
+* {
+	margin: 0%;
+	padding: 0%;
+	-webkit-user-drag: none;
+}
+
+:global {
+	body {
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+	}
+}
+
+:root {
+	font-size: 16px;
+}
+
+.app {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	// border: 1px solid #333;
+	display: flex;
+	background-color: #ffffff;
+
+	.navigator {
+		position: relative;
+		width: 15rem;
+		height: 100%;
+		background-color: #ffffff;
+		box-shadow: 0 0 0.25rem 0 #ccc;
+
+		&Container {
+			position: relative;
+			width: 100%;
+			height: 3rem;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 1.25rem;
+			transition: all 0.3s linear;
+			cursor: pointer;
+			margin: 0.25rem 0;
+
+			&:hover {
+				background-color: #e6f4ff;
+			}
+
+			&:active,
+			&Checked,
+			&Checked:hover {
+				background-color: #e6f4ff;
+			}
+
+			&Checked {
+				color: #1677ff;
+			}
+		}
+	}
+
+	.content {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+}

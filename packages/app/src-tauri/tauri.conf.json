@@ -13,9 +13,18 @@
 	"tauri": {
 		"allowlist": {
 			"all": false,
+			"process": {
+				"all": false,
+				"exit": true,
+				"relaunch": false,
+				"relaunchDangerousAllowSymlinkMacos": false
+			},
 			"shell": {
 				"all": false,
 				"open": true
+			},
+			"window": {
+				"all": true
 			}
 		},
 		"bundle": {
@@ -42,7 +51,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": [],
+			"resources": ["./resources"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {
@@ -60,13 +69,38 @@
 		"windows": [
 			{
 				"fullscreen": false,
+				"width": 500,
+				"height": 375,
+				"resizable": false,
+				"title": "Loading App...",
+				"center": true,
+				"visible": true,
+				"label": "splash",
+				"url": "views/splash.html",
+				"alwaysOnTop": true,
+				"decorations": false
+			},
+			{
+				"fullscreen": false,
 				"width": 1000,
 				"height": 650,
 				"resizable": true,
 				"title": "omr-img-corrector",
 				"center": true,
 				"visible": false,
-				"label": "main"
+				"label": "main",
+				"url": "views/main.html"
+			},
+			{
+				"fullscreen": false,
+				"width": 1000,
+				"height": 650,
+				"resizable": true,
+				"title": "settings",
+				"center": true,
+				"visible": false,
+				"label": "settings",
+				"url": "views/options.html"
 			}
 		]
 	}
