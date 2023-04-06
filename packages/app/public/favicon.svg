@@ -5,8 +5,17 @@
 	color-interpolation-filters="sRGB"
 	style="margin: auto"
 >
-	<g transform="translate(106.15490169128442, 144.32638713680836)">
-		<g transform="scale(2)">
+	<rect
+		fill="#abcdef"
+		fill-opacity="0"
+		stroke-width="2"
+		x="0"
+		y="0"
+		width="100%"
+		height="100%"
+	></rect>
+	<g transform="translate(31.23235253692664, 88.48956481753709)">
+		<g transform="scale(3)">
 			<g fill="#000000">
 				<g opacity="1" transform="matrix(1,0,0,1,18.67255401611328,0)">
 					<g>

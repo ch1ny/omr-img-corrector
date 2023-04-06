@@ -51,7 +51,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": ["./resources"],
+			"resources": [],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {
@@ -74,11 +74,13 @@
 				"resizable": false,
 				"title": "Loading App...",
 				"center": true,
-				"visible": true,
+				"visible": false,
 				"label": "splash",
 				"url": "views/splash.html",
 				"alwaysOnTop": true,
-				"decorations": false
+				"decorations": false,
+				"transparent": true,
+				"skipTaskbar": true
 			},
 			{
 				"fullscreen": false,
@@ -93,9 +95,9 @@
 			},
 			{
 				"fullscreen": false,
-				"width": 1000,
-				"height": 650,
-				"resizable": true,
+				"width": 500,
+				"height": 600,
+				"resizable": false,
 				"title": "settings",
 				"center": true,
 				"visible": false,

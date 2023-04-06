@@ -1,10 +1,44 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
+
+/**
+ * 按需加载 Material UI
+ * @returns
+ */
+const MuiPlugin = (): PluginOption => {
+	return {
+		name: 'material-ui',
+		transform(this, code, id, options?) {
+			if (!id.endsWith('.ts') && !id.endsWith('.tsx')) {
+				return;
+			}
+
+			const MuiRegex = new RegExp(
+				/import {(.*?)} from (('@mui\/material')|("@mui\/material"))(;?)/
+			);
+			const matched = code.match(MuiRegex);
+			if (!matched || matched.length < 2) return;
+
+			const imported = matched[1];
+			return {
+				code: code.replace(
+					matched[0],
+					imported
+						.split(',')
+						.map((comp) => comp.trim())
+						.filter((comp) => !comp.startsWith('type'))
+						.map((comp) => `import ${comp} from "@mui/material/${comp}";\n`)
+						.join('')
+				),
+			};
+		},
+	};
+};
 
 // https://vitejs.dev/config/
-export default defineConfig({
-	plugins: [react()],
+export default defineConfig((env) => ({
+	plugins: [react(), env.mode === 'production' ? MuiPlugin() : undefined].filter((x) => !!x),
 	resolve: {
 		alias: {
 			'@': path.resolve(__dirname, 'src'),
@@ -51,4 +85,4 @@ export default defineConfig({
 			},
 		},
 	},
-});
+}));

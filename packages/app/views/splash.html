@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Loading OMR Corrector...</title>
 		<style>
 			@font-face {
@@ -16,6 +16,7 @@
 				padding: 0%;
 				position: relative;
 				user-select: none;
+				-webkit-user-drag: none;
 			}
 
 			body {
@@ -29,10 +30,10 @@
 			}
 
 			#main {
-				width: calc(100% - 4px);
-				height: calc(100% - 4px);
-				box-shadow: 0 0 2px #cacaca;
-				background-color: #fafafa;
+				width: calc(100% - 12px);
+				height: calc(100% - 12px);
+				box-shadow: 0 0 6px #888;
+				background-color: #fff;
 				display: flex;
 				flex-direction: column;
 				justify-content: center;
@@ -65,20 +66,20 @@
 		<!-- slogan 跳动 -->
 		<style>
 			#slogan span {
-        min-width: 0.5em;
+				min-width: 0.5em;
 				/* 内联元素（inline）动画不起作用， 因此要设置为‘inline-block’ */
 				display: inline-block;
-        animation-name: jump;
-        animation-duration: 3000ms;
-        animation-iteration-count: infinite;
+				animation-name: jump;
+				animation-duration: 3000ms;
+				animation-iteration-count: infinite;
 				animation-delay: var(--delay);
 			}
 
-
 			@keyframes jump {
-        0%, 16% {
+				0%,
+				16% {
 					transform: translateY(0);
-        }
+				}
 				8% {
 					transform: translateY(-10px);
 				}
@@ -159,9 +160,10 @@
 					const span = document.createElement('span');
 					span.innerText = char;
 					sloganWrapper.appendChild(span);
-          span.style.setProperty("--delay", `${idx * 100}ms`);
+					span.style.setProperty('--delay', `${idx * 100}ms`);
 				});
 			});
 		</script>
+		<script type="module" src="/src/views/Splash/index.ts"></script>
 	</footer>
 </html>

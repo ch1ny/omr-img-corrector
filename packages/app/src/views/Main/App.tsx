@@ -1,6 +1,7 @@
+import { SettingIcon } from '@/components';
 import useMount from '@/hooks/useMount';
 import { Invokers } from '@/utils';
-import Button from '@mui/material/Button';
+import { Button, Divider } from '@mui/material';
 import styles from './App.module.less';
 import onAppStart from './onAppStart';
 
@@ -10,9 +11,16 @@ function App() {
 	return (
 		<div className={styles.app}>
 			<div className={styles.content}>
-				<Button variant='contained' disableElevation onClick={Invokers.showSettingsWindow}>
-					设置
-				</Button>
+				<div className={styles.header}>
+					<Button
+						variant='outlined'
+						startIcon={<SettingIcon />}
+						onClick={Invokers.showSettingsWindow}
+					>
+						设置
+					</Button>
+				</div>
+				<Divider />
 			</div>
 		</div>
 	);
