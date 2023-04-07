@@ -19,6 +19,7 @@ pub fn get_angle_with_hough(
     min_line_length: f64,
     max_line_gap: f64,
     file_name: &str,
+    edge_image_output_dir: &str,
 ) -> Result<f64, opencv::Error> {
     let mat = gray_tm.get_mat();
 
@@ -92,7 +93,7 @@ pub fn get_angle_with_hough(
     }
 
     imgcodecs::imwrite(
-        &(String::from("C:/Users/10563/Desktop/result/edges/") + file_name),
+        &(String::from(edge_image_output_dir) + file_name),
         &lined_img,
         &VectorOfi32::from(vec![imgcodecs::IMWRITE_JPEG_QUALITY, 100]),
     )

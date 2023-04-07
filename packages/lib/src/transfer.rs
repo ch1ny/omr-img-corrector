@@ -220,7 +220,7 @@ pub fn transfer_thresh_binary_to_horizontal_projection(
 /// 提取黑白二值图的纵向投影数据
 #[allow(dead_code)]
 pub fn get_vertical_projection(src: &TransformableMatrix) -> Result<Vec<f64>, opencv::Error> {
-    let mat = &src.matrix;
+    let mat: &Mat = &src.matrix;
 
     let mut result = vec![0.0; mat.cols() as usize];
 
@@ -229,8 +229,9 @@ pub fn get_vertical_projection(src: &TransformableMatrix) -> Result<Vec<f64>, op
         // 获取当前行的数据数组
         let row = mat.at_row::<u8>(row_index)?;
 
+        let mut col_index = 0;
         // 遍历当前行的每一个色块
-        for (col_index, item) in row.iter().enumerate() {
+        row.iter().for_each(|item| {
             // 如果为白色色块
             // 不做处理
             // 如果为黑色色块
@@ -238,7 +239,8 @@ pub fn get_vertical_projection(src: &TransformableMatrix) -> Result<Vec<f64>, op
             if *item == 0 {
                 result[col_index] += 1.0;
             }
-        }
+            col_index += 1;
+        });
     }
 
     Ok(result)
@@ -367,10 +369,10 @@ pub fn rotate_mat(
 pub fn get_projection_standard_deviations(
     src: &TransformableMatrix,
 ) -> Result<(f64, f64), opencv::Error> {
-    let vertical_standard_deviation =
-        calculate::get_standard_deviation(&self::get_vertical_projection(src)?);
-    let horizontal_standard_deviation =
-        calculate::get_standard_deviation(&self::get_horizontal_projection(src)?);
+    let vertical_projection = &self::get_vertical_projection(src)?;
+    let vertical_standard_deviation = calculate::get_standard_deviation(vertical_projection);
+    let horizontal_projection = &self::get_horizontal_projection(src)?;
+    let horizontal_standard_deviation = calculate::get_standard_deviation(horizontal_projection);
 
     Ok((vertical_standard_deviation, horizontal_standard_deviation))
 }
