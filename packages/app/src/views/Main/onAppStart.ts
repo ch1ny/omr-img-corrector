@@ -1,6 +1,6 @@
 import path from '@/core/path';
 import { Invokers, Paths } from '@/utils';
-import { fs, process, window } from '@tauri-apps/api';
+import { fs, window } from '@tauri-apps/api';
 
 const START_TIME = Date.now();
 const MIN_SPLASH_DURATION = 750; // splash window 至少 0.75 秒
@@ -9,8 +9,7 @@ export default async () => {
 	const mainWindow = window.getCurrent();
 	await mainWindow.onCloseRequested(async (ev) => {
 		ev.preventDefault();
-		await Promise.all(window.getAll().map((win) => win.hide()));
-		process.exit(1);
+		Invokers.exitApp();
 	});
 
 	try {

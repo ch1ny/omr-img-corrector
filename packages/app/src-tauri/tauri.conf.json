@@ -28,12 +28,6 @@
 			"path": {
 				"all": true
 			},
-			"process": {
-				"all": false,
-				"exit": true,
-				"relaunch": false,
-				"relaunchDangerousAllowSymlinkMacos": false
-			},
 			"shell": {
 				"all": false,
 				"open": true

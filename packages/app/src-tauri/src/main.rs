@@ -43,6 +43,12 @@ async fn get_exe_path(_window: tauri::Window) -> String {
     }
 }
 
+#[tauri::command]
+async fn exit_app() {
+    // 退出程序
+    std::process::exit(1);
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -51,6 +57,7 @@ fn main() {
             show_settings_window,
             show_test_window,
             get_exe_path,
+            exit_app,
             test::run_test,
             hardware::system_cpu_info,
             hardware::system_hardware_info,

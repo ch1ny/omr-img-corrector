@@ -73,6 +73,8 @@ const runTest = async (testId: number) => {
 	});
 };
 
+const exitApp = async () => invoke('exit_app');
+
 export const Invokers = {
 	showSplashWindow,
 	showMainWindow,
@@ -81,4 +83,5 @@ export const Invokers = {
 	getCpuInfo,
 	getExePath,
 	runTest,
+	exitApp,
 };
