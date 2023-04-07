@@ -1,4 +1,4 @@
-import { SettingIcon } from '@/components';
+import { FireIcon, SettingIcon } from '@/components';
 import useMount from '@/hooks/useMount';
 import { Invokers } from '@/utils';
 import { Button, Divider } from '@mui/material';
@@ -12,13 +12,20 @@ function App() {
 		<div className={styles.app}>
 			<div className={styles.content}>
 				<div className={styles.header}>
-					<Button
-						variant='outlined'
-						startIcon={<SettingIcon />}
-						onClick={Invokers.showSettingsWindow}
-					>
-						设置
-					</Button>
+					<div className={styles.headerButton}>
+						<Button
+							variant='outlined'
+							startIcon={<SettingIcon />}
+							onClick={Invokers.showSettingsWindow}
+						>
+							设置
+						</Button>
+					</div>
+					<div className={styles.headerButton}>
+						<Button variant='outlined' startIcon={<FireIcon />} onClick={Invokers.showTestWindow}>
+							测试
+						</Button>
+					</div>
 				</div>
 				<Divider />
 			</div>

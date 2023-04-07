@@ -3,9 +3,8 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import useMount from '@/hooks/useMount';
 import { ICpuInfo } from '@/types';
 import { getHardwareInfos } from '@/utils';
-import { Checkbox, Divider, Input } from '@mui/material';
+import { Checkbox, Input } from '@mui/material';
 import { useMemo } from 'react';
-import Option from '../../Option';
 import styles from './index.module.less';
 
 const SystemInfo = () => {
@@ -38,16 +37,6 @@ const SystemInfo = () => {
 		<div className={styles.systemInfo}>
 			<div className={styles.multiThread}>
 				<div>
-					<CpuIcon
-						style={{
-							fontSize: '20px',
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					/>
-				</div>
-				<div>
 					<Checkbox
 						checked={multiThreadOptions.use}
 						onChange={(ev) => {
@@ -58,7 +47,25 @@ const SystemInfo = () => {
 						}}
 					/>
 				</div>
-				<div>使用多线程</div>
+				<div
+					className={styles.multiThreadTitle}
+					onClick={() =>
+						setMultiThreadOptions((oldOptions) => ({
+							...oldOptions,
+							use: !oldOptions.use,
+						}))
+					}
+				>
+					使用多线程
+				</div>
+				<div>
+					<CpuIcon
+						style={{
+							marginLeft: '6px',
+							fontSize: '20px',
+						}}
+					/>
+				</div>
 				<div style={{ marginLeft: 'auto' }}>
 					<Input
 						size='small'
@@ -80,13 +87,8 @@ const SystemInfo = () => {
 				</div>
 				<div style={{ padding: '0 3px', fontSize: '12px' }}>[1-{cpu.maxThreadCounts}]</div>
 			</div>
-			<Divider />
 		</div>
 	);
 };
 
-export default () => (
-	<Option title='系统信息'>
-		<SystemInfo />
-	</Option>
-);
+export default SystemInfo;

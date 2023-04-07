@@ -6,6 +6,7 @@
 use tauri::Manager;
 
 mod hardware;
+mod test;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -29,6 +30,12 @@ async fn show_settings_window(window: tauri::Window) {
 }
 
 #[tauri::command]
+async fn show_test_window(window: tauri::Window) {
+    // 展示测试窗口
+    window.get_window("test").unwrap().show().unwrap();
+}
+
+#[tauri::command]
 async fn get_exe_path(_window: tauri::Window) -> String {
     match std::env::current_exe() {
         Ok(path_buf) => return path_buf.to_str().unwrap().to_string(),
@@ -42,7 +49,9 @@ fn main() {
             show_splash_window,
             show_main_window,
             show_settings_window,
+            show_test_window,
             get_exe_path,
+            test::run_test,
             hardware::system_cpu_info,
             hardware::system_hardware_info,
         ])

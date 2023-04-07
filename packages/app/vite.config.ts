@@ -61,6 +61,7 @@ export default defineConfig((env) => ({
 				main: path.resolve(__dirname, 'views', 'main.html'),
 				options: path.resolve(__dirname, 'views', 'options.html'),
 				splash: path.resolve(__dirname, 'views', 'splash.html'),
+				test: path.resolve(__dirname, 'views', 'test.html'),
 			},
 		},
 		// Tauri supports es2021

@@ -18,7 +18,9 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+; 默认安装路径
+; DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName=D:\{#MyAppName}
 ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
@@ -40,6 +42,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\src-tauri\target\release\omr-corrector.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src-tauri\target\release\opencv_world460.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src-tauri\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

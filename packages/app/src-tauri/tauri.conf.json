@@ -13,6 +13,21 @@
 	"tauri": {
 		"allowlist": {
 			"all": false,
+			"dialog": {
+				"all": false,
+				"ask": false,
+				"confirm": false,
+				"message": false,
+				"open": true,
+				"save": false
+			},
+			"fs": {
+				"all": true,
+				"scope": ["**"]
+			},
+			"path": {
+				"all": true
+			},
 			"process": {
 				"all": false,
 				"exit": true,
@@ -28,7 +43,7 @@
 			}
 		},
 		"bundle": {
-			"active": true,
+			"active": false,
 			"category": "DeveloperTool",
 			"copyright": "",
 			"deb": {
@@ -51,7 +66,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": [],
+			"resources": ["./resources/*"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {
@@ -103,6 +118,17 @@
 				"visible": false,
 				"label": "settings",
 				"url": "views/options.html"
+			},
+			{
+				"fullscreen": false,
+				"width": 800,
+				"height": 600,
+				"resizable": true,
+				"title": "Test",
+				"center": true,
+				"visible": false,
+				"label": "test",
+				"url": "views/test.html"
 			}
 		]
 	}
