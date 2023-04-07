@@ -260,6 +260,7 @@ fn run_test(p: bool, h: bool, f: bool) {
                 125.0,
                 15.0,
                 file_name,
+                "C:/Users/10563/Desktop/result/edges/",
             )
             .unwrap();
             transfer::rotate_mat(
