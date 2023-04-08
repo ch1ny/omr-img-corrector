@@ -17,8 +17,8 @@ async fn show_splash_window(window: tauri::Window) {
 
 #[tauri::command]
 async fn show_main_window(window: tauri::Window) {
-    // 关闭启动窗口
-    window.get_window("splash").unwrap().close().unwrap();
+    // 隐藏启动窗口
+    window.get_window("splash").unwrap().hide().unwrap();
     // 展示主窗口
     let main_window = window.get_window("main").unwrap();
     main_window.show().unwrap();
