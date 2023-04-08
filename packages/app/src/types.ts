@@ -24,3 +24,24 @@ export interface ISystemHardwareInfo {
 	cpu: ICpuInfo;
 	gpu: IGpuInfo;
 }
+
+export interface IUseMultiThreadParams {
+	use: boolean;
+	threadCounts: number;
+}
+
+export interface IProjectionParams {
+	maxAngle: number;
+	angleStep: number;
+	imageResizeScale: number;
+}
+
+export interface IHoughParams {
+	minLineLength: number;
+	maxLineGap: number;
+}
+
+export interface IFftParams {
+	minLineLength: number;
+	maxLineGap: number;
+}

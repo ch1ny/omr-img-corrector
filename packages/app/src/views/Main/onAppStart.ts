@@ -1,11 +1,13 @@
 import path from '@/core/path';
-import { Invokers, Paths } from '@/utils';
+import { disableWebviewContextMenu, Invokers, Paths } from '@/utils';
 import { fs, window } from '@tauri-apps/api';
 
 const START_TIME = Date.now();
 const MIN_SPLASH_DURATION = 750; // splash window 至少 0.75 秒
 
 export default async () => {
+	disableWebviewContextMenu();
+
 	const mainWindow = window.getCurrent();
 	await mainWindow.onCloseRequested(async (ev) => {
 		ev.preventDefault();

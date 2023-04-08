@@ -1,6 +1,7 @@
 import path from '@/core/path';
 import { ICpuInfo } from '@/types';
 import { fs, invoke } from '@tauri-apps/api';
+import { getLibParams } from './getLibParams';
 import { Paths } from './paths';
 
 /**
@@ -70,6 +71,7 @@ const runTest = async (testId: number) => {
 
 	return invoke('run_test', {
 		testId,
+		...getLibParams(),
 	});
 };
 

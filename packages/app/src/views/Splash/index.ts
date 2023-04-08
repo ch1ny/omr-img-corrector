@@ -1,3 +1,5 @@
-import { Invokers } from '@/utils';
+import { disableWebviewContextMenu, Invokers } from '@/utils';
+
+disableWebviewContextMenu();
 
 Invokers.showSplashWindow();

@@ -26,7 +26,7 @@
 	right: 0px;
 	// border: 1px solid #333;
 	display: flex;
-	background-color: #eff5f7;
+	background-color: #fafafa;
 
 	.content {
 		position: relative;
@@ -42,6 +42,29 @@
 			align-items: center;
 			padding: 0.75rem 1rem;
 			box-sizing: border-box;
+			overflow: auto;
+
+			/* 滚动条整体 */
+			&::-webkit-scrollbar {
+				height: 6px;
+				width: 6px;
+			}
+
+			/* 两个滚动条交接处 -- x轴和y轴 */
+			&::-webkit-scrollbar-corner {
+				background-color: transparent;
+			}
+
+			/* 滚动条滑块 */
+			&::-webkit-scrollbar-thumb {
+				border-radius: 3px;
+				background: #bababa;
+			}
+
+			/* 滚动条轨道 */
+			&::-webkit-scrollbar-track {
+				background: #fafafa;
+			}
 		}
 	}
 }

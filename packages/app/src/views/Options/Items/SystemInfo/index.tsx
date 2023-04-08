@@ -1,7 +1,7 @@
 import { CpuIcon } from '@/components';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import useMount from '@/hooks/useMount';
-import { ICpuInfo } from '@/types';
+import { ICpuInfo, IUseMultiThreadParams } from '@/types';
 import { getHardwareInfos } from '@/utils';
 import { Checkbox, Input } from '@mui/material';
 import { useMemo } from 'react';
@@ -26,12 +26,15 @@ const SystemInfo = () => {
 		[hardwareInfo?.cpu]
 	);
 
-	const [multiThreadOptions, setMultiThreadOptions] = useLocalStorage('use_multi_thread', {
-		defaultValue: {
-			use: false,
-			threadCounts: 1,
-		},
-	});
+	const [multiThreadOptions, setMultiThreadOptions] = useLocalStorage<IUseMultiThreadParams>(
+		'use_multi_thread',
+		{
+			defaultValue: {
+				use: false,
+				threadCounts: 1,
+			},
+		}
+	);
 
 	return (
 		<div className={styles.systemInfo}>
