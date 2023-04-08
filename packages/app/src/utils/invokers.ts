@@ -37,7 +37,7 @@ const showTestWindow = () => {
 };
 
 /**
- * 获取系统硬件信息
+ * 获取中央处理器信息
  * @returns
  */
 const getCpuInfo = async () => {

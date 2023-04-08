@@ -3,14 +3,13 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import useMount from '@/hooks/useMount';
 import { ICpuInfo, IUseMultiThreadParams } from '@/types';
 import { getHardwareInfos } from '@/utils';
-import { Checkbox, Input } from '@mui/material';
+import { Checkbox, Divider, Input } from '@mui/material';
 import { useMemo } from 'react';
 import styles from './index.module.less';
 
 const SystemInfo = () => {
 	const [hardwareInfo, setHardwareInfo] =
 		useLocalStorage<Awaited<ReturnType<typeof getHardwareInfos>>>('hardware_info');
-
 	useMount(async () => {
 		const awaitedHardwareInfo = await getHardwareInfos();
 		setHardwareInfo(awaitedHardwareInfo);
@@ -89,6 +88,25 @@ const SystemInfo = () => {
 					/>
 				</div>
 				<div style={{ padding: '0 3px', fontSize: '12px' }}>[1-{cpu.maxThreadCounts}]</div>
+			</div>
+			<Divider />
+			<div className={styles.infoContent}>
+				<div className={styles.infoItem}>
+					<div>显卡型号</div>
+					<div>{hardwareInfo.gpu.renderer}</div>
+				</div>
+				<div className={styles.infoItem}>
+					<div>处理器型号</div>
+					<div>{hardwareInfo.cpu.chipName}</div>
+				</div>
+				<div className={styles.infoItem}>
+					<div>处理器核心数</div>
+					<div>{hardwareInfo.cpu.physicalCoreCounts}</div>
+				</div>
+				<div className={styles.infoItem}>
+					<div>处理器最大处理线程</div>
+					<div>{hardwareInfo.cpu.maxThreadCounts}</div>
+				</div>
 			</div>
 		</div>
 	);
