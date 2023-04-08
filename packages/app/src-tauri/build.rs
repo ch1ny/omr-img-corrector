@@ -5,7 +5,7 @@ fn main() {
 
     // 获取 debug/release mode
     let profile = env::var("PROFILE").unwrap();
-    // 复制 mydll.dll
+    // 复制 opencv_world460.dll
     let src_path = PathBuf::from("../assets/opencv_world460.dll");
     let dest_path = PathBuf::from("./target")
         .join(profile)
