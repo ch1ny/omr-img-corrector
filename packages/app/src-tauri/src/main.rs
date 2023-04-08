@@ -38,7 +38,7 @@ async fn show_test_window(window: tauri::Window) {
 #[tauri::command]
 async fn get_exe_path(_window: tauri::Window) -> String {
     match std::env::current_exe() {
-        Ok(path_buf) => return path_buf.to_str().unwrap().to_string(),
+        Ok(path_buf) => path_buf.to_str().unwrap().to_string(),
         Err(_) => String::from(""),
     }
 }

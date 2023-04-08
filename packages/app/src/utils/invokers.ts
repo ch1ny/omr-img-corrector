@@ -53,7 +53,9 @@ const getCpuInfo = async () => {
 };
 
 const getExePath = async (): Promise<string> => {
-	return invoke('get_exe_path');
+	const exePath: string = await invoke('get_exe_path');
+
+	return exePath.replace(/^(\\\\\?\\)(.*?)/, '$2');
 };
 
 const runTest = async (testId: number) => {
