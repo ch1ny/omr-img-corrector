@@ -20,19 +20,25 @@ async fn show_main_window(window: tauri::Window) {
     // 关闭启动窗口
     window.get_window("splash").unwrap().close().unwrap();
     // 展示主窗口
-    window.get_window("main").unwrap().show().unwrap();
+    let main_window = window.get_window("main").unwrap();
+    main_window.show().unwrap();
+    main_window.set_focus().unwrap();
 }
 
 #[tauri::command]
 async fn show_settings_window(window: tauri::Window) {
     // 展示设置窗口
-    window.get_window("settings").unwrap().show().unwrap();
+    let setting_window = window.get_window("settings").unwrap();
+    setting_window.show().unwrap();
+    setting_window.set_focus().unwrap();
 }
 
 #[tauri::command]
 async fn show_test_window(window: tauri::Window) {
     // 展示测试窗口
-    window.get_window("test").unwrap().show().unwrap();
+    let test_window = window.get_window("test").unwrap();
+    test_window.show().unwrap();
+    test_window.set_focus().unwrap();
 }
 
 #[tauri::command]

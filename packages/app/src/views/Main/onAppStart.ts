@@ -26,6 +26,5 @@ export default async () => {
 
 	setTimeout(async () => {
 		await Invokers.showMainWindow();
-		mainWindow.requestUserAttention(1);
 	}, MIN_SPLASH_DURATION - Date.now() + START_TIME);
 };
