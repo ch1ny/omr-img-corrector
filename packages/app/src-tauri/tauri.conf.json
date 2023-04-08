@@ -16,7 +16,7 @@
 			"dialog": {
 				"all": false,
 				"ask": false,
-				"confirm": false,
+				"confirm": true,
 				"message": false,
 				"open": true,
 				"save": false
@@ -30,8 +30,8 @@
 			},
 			"process": {
 				"all": false,
-				"exit": true,
-				"relaunch": false,
+				"exit": false,
+				"relaunch": true,
 				"relaunchDangerousAllowSymlinkMacos": false
 			},
 			"shell": {

@@ -1,16 +1,17 @@
 import path from '@/core/path';
-import { Invokers, Paths } from '@/utils';
-import { fs, process, window } from '@tauri-apps/api';
+import { disableWebviewContextMenu, Invokers, Paths } from '@/utils';
+import { fs, window } from '@tauri-apps/api';
 
 const START_TIME = Date.now();
 const MIN_SPLASH_DURATION = 750; // splash window 至少 0.75 秒
 
 export default async () => {
+	disableWebviewContextMenu();
+
 	const mainWindow = window.getCurrent();
 	await mainWindow.onCloseRequested(async (ev) => {
 		ev.preventDefault();
-		await Promise.all(window.getAll().map((win) => win.hide()));
-		process.exit(1);
+		Invokers.exitApp();
 	});
 
 	try {
@@ -25,6 +26,5 @@ export default async () => {
 
 	setTimeout(async () => {
 		await Invokers.showMainWindow();
-		mainWindow.requestUserAttention(1);
 	}, MIN_SPLASH_DURATION - Date.now() + START_TIME);
 };

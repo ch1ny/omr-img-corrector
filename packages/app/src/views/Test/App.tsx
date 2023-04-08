@@ -1,7 +1,7 @@
 import useMount from '@/hooks/useMount';
 import { Invokers } from '@/utils';
 import { Button, CircularProgress, Divider, Grid, LinearProgress } from '@mui/material';
-import { event } from '@tauri-apps/api';
+import { event, window } from '@tauri-apps/api';
 import { useCallback, useEffect, useState } from 'react';
 import styles from './App.module.less';
 import onAppStart from './onAppStart';
@@ -63,8 +63,17 @@ function App() {
 	const [testResult, setTestResult] = useState<TestResult | null>(null);
 	useEffect(() => {
 		const unListenTestResult = event.listen('test_result', (ev) => {
-			setTestResult(ev.payload as TestResult);
-			setTestId(0);
+			setTestId((currentTestId) => {
+				const receivedResult = ev.payload as TestResult;
+				if (receivedResult.test_id !== currentTestId) return currentTestId;
+
+				setTestResult(receivedResult);
+				return 0;
+			});
+			const currentWindow = window.getCurrent();
+			currentWindow.show().then(() => {
+				currentWindow.setFocus();
+			});
 		});
 		const unListenTestProgress = event.listen('run_test_progress_event', (ev) => {
 			const payload = ev.payload as RunTestProgressEventPayload;

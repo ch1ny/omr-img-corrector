@@ -234,7 +234,15 @@ const OUTPUT_DIR_PATH: &str = "C:/Users/10563/Desktop/result";
 const OUTPUT_DIR_PATH: &str = "./resources/test/result";
 
 #[tauri::command]
-pub fn run_test(test_id: usize, window: tauri::Window) -> usize {
+pub fn run_test(
+    test_id: usize,
+    projection_max_angle: u16,
+    projection_angle_step: f64,
+    projection_resize_scale: f64,
+    hough_min_line_length: f64,
+    hough_max_line_gap: f64,
+    window: tauri::Window,
+) -> usize {
     thread::spawn(move || {
         let instant = Instant::now();
         let mut random = rand::thread_rng();
@@ -296,12 +304,13 @@ pub fn run_test(test_id: usize, window: tauri::Window) -> usize {
             let thresh_image = {
                 let mut gray_image =
                     transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
-                let gray_image = gray_image.resize_self(0.2).unwrap();
+                let gray_image = gray_image.resize_self(projection_resize_scale).unwrap();
 
                 transfer::transfer_gray_image_to_thresh_binary(&gray_image).unwrap()
             };
 
-            let projection_angle = find_target_angle(45, 0.2, thresh_image, 1);
+            let projection_angle =
+                find_target_angle(projection_max_angle, projection_angle_step, thresh_image, 1);
 
             let final_image = transfer::rotate_mat(
                 &original_image,
@@ -366,8 +375,8 @@ pub fn run_test(test_id: usize, window: tauri::Window) -> usize {
             // let max_line_gap = min_line_length * 0.1;
             let hough_angle = oics::hough::get_angle_with_hough(
                 &transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap(),
-                125.0,
-                15.0,
+                hough_min_line_length,
+                hough_max_line_gap,
                 &file_name,
                 &(String::from(OUTPUT_DIR_PATH) + &"/edges/"),
             )
