@@ -1,11 +1,13 @@
-import useMount from '@/hooks/useMount';
-import { Invokers } from '@/utils';
+import { IFftParams, IHoughParams, IProjectionParams } from '@/types';
+import { getLibParams, Invokers } from '@/utils';
 import { Button, CircularProgress, Divider, Grid, LinearProgress } from '@mui/material';
-import { event, window } from '@tauri-apps/api';
+// NOTE: 这里使用 window 会报错：Error: @vitejs/plugin-react can't detect preamble. Something is wrong.
+import { event, window as tauriApiWindow } from '@tauri-apps/api';
 import { useCallback, useEffect, useState } from 'react';
 import styles from './App.module.less';
+import logTestResult, { TestResult } from './logTestResult';
 import onAppStart from './onAppStart';
-import ResultCard, { TestResultMistakes } from './ResultCard';
+import ResultCard from './ResultCard';
 
 type RunTestProgressEventPayload = {
 	method: 'Projection' | 'Hough' | 'FFT';
@@ -13,20 +15,6 @@ type RunTestProgressEventPayload = {
 	processed_progress: number;
 	test_id: number;
 	total_count: number;
-};
-
-type TestResult = {
-	test_id: number;
-	durations: {
-		projection: number;
-		hough: number;
-		fft: number;
-	};
-	mistakes: {
-		projection: TestResultMistakes;
-		hough: TestResultMistakes;
-		fft: TestResultMistakes;
-	};
 };
 
 interface MethodTestProgress {
@@ -46,10 +34,33 @@ const createDefaultMethodProgress = (testId: number, method: 'Projection' | 'Hou
 		},
 	} as MethodTestProgress);
 
-function App() {
-	useMount(onAppStart);
+type TestInfo = {
+	testId: number;
+	testParams?: {
+		projection: IProjectionParams;
+		hough: IHoughParams;
+		fft: IFftParams;
+	};
+};
 
-	const [testId, setTestId] = useState(0);
+function App() {
+	const [initStatus] = useState(onAppStart());
+	useEffect(() => {
+		const unListen = event.listen('request_show', async () => {
+			await initStatus;
+			await Invokers.showTestWindow();
+		});
+
+		return () => {
+			unListen.then((unListenFn) => {
+				unListenFn();
+			});
+		};
+	}, []);
+
+	const [testInfo, setTestInfo] = useState<TestInfo>({
+		testId: 0,
+	});
 	const [projectionTestProgress, setProjectionTestProgress] = useState<MethodTestProgress>(
 		createDefaultMethodProgress(0, 'Projection')
 	);
@@ -63,14 +74,20 @@ function App() {
 	const [testResult, setTestResult] = useState<TestResult | null>(null);
 	useEffect(() => {
 		const unListenTestResult = event.listen('test_result', (ev) => {
-			setTestId((currentTestId) => {
+			setTestInfo((currentTestInfo) => {
 				const receivedResult = ev.payload as TestResult;
-				if (receivedResult.test_id !== currentTestId) return currentTestId;
+				if (receivedResult.test_id !== currentTestInfo.testId) return currentTestInfo;
 
 				setTestResult(receivedResult);
-				return 0;
+				logTestResult({
+					...receivedResult,
+					params: currentTestInfo.testParams!,
+				});
+				return {
+					testId: 0,
+				};
 			});
-			const currentWindow = window.getCurrent();
+			const currentWindow = tauriApiWindow.getCurrent();
 			currentWindow.show().then(() => {
 				currentWindow.setFocus();
 			});
@@ -119,12 +136,30 @@ function App() {
 
 	const runTest = useCallback(() => {
 		const newTestId = Date.now();
-		setTestId(newTestId);
+		const libParams = getLibParams();
+		setTestInfo({
+			testId: newTestId,
+			testParams: {
+				projection: {
+					maxAngle: libParams.projectionMaxAngle,
+					angleStep: libParams.projectionAngleStep,
+					imageResizeScale: libParams.projectionResizeScale,
+				},
+				hough: {
+					minLineLength: libParams.houghMinLineLength,
+					maxLineGap: libParams.houghMaxLineGap,
+				},
+				fft: {
+					minLineLength: libParams.fftMinLineLength,
+					maxLineGap: libParams.fftMaxLineGap,
+				},
+			},
+		});
 		setTestResult(null);
 		setProjectionTestProgress(createDefaultMethodProgress(newTestId, 'Projection'));
 		setHoughTestProgress(createDefaultMethodProgress(newTestId, 'Hough'));
 		setFftTestProgress(createDefaultMethodProgress(newTestId, 'FFT'));
-		Invokers.runTest(newTestId);
+		Invokers.runTest(newTestId, libParams);
 	}, []);
 
 	return (
@@ -133,13 +168,13 @@ function App() {
 				<div className={styles.header}>
 					<Button
 						variant='contained'
-						startIcon={testId !== 0 && <CircularProgress size={'1em'} color={'inherit'} />}
+						startIcon={testInfo.testId !== 0 && <CircularProgress size={'1em'} color={'inherit'} />}
 						onClick={runTest}
-						disabled={testId !== 0}
+						disabled={testInfo.testId !== 0}
 						color={!!testResult ? 'success' : 'primary'}
 						fullWidth
 					>
-						{testId === 0 ? `Run Test${!!testResult ? ' Again' : ''}` : 'Test Running'}
+						{testInfo.testId === 0 ? `Run Test${!!testResult ? ' Again' : ''}` : 'Test Running'}
 					</Button>
 				</div>
 				<Divider />
@@ -148,7 +183,7 @@ function App() {
 						<LinearProgress
 							color={projectionTestProgress.status === 'PROCESSED' ? 'success' : 'primary'}
 							variant={
-								testId !== 0 && projectionTestProgress.status === 'WAITING'
+								testInfo.testId !== 0 && projectionTestProgress.status === 'WAITING'
 									? 'indeterminate'
 									: 'determinate'
 							}
@@ -159,7 +194,7 @@ function App() {
 						<LinearProgress
 							color={houghTestProgress.status === 'PROCESSED' ? 'success' : 'secondary'}
 							variant={
-								testId !== 0 && houghTestProgress.status === 'WAITING'
+								testInfo.testId !== 0 && houghTestProgress.status === 'WAITING'
 									? 'indeterminate'
 									: 'determinate'
 							}
@@ -170,7 +205,7 @@ function App() {
 						<LinearProgress
 							color={fftTestProgress.status === 'PROCESSED' ? 'success' : 'warning'}
 							variant={
-								testId !== 0 && fftTestProgress.status === 'WAITING'
+								testInfo.testId !== 0 && fftTestProgress.status === 'WAITING'
 									? 'indeterminate'
 									: 'determinate'
 							}

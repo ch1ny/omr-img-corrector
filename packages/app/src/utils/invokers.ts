@@ -1,7 +1,7 @@
 import path from '@/core/path';
 import { ICpuInfo } from '@/types';
 import { fs, invoke } from '@tauri-apps/api';
-import { getLibParams } from './getLibParams';
+import type { getLibParams } from './getLibParams';
 import { Paths } from './paths';
 
 /**
@@ -58,7 +58,7 @@ const getExePath = async (): Promise<string> => {
 	return exePath.replace(/^(\\\\\?\\)(.*?)/, '$2');
 };
 
-const runTest = async (testId: number) => {
+const runTest = async (testId: number, params: ReturnType<typeof getLibParams>) => {
 	if (Paths.exePath === undefined) {
 		await Paths.initPaths();
 	}
@@ -73,17 +73,31 @@ const runTest = async (testId: number) => {
 
 	return invoke('run_test', {
 		testId,
-		...getLibParams(),
+		...params,
 	});
 };
 
 const exitApp = async () => invoke('exit_app');
+
+const appendFile = async (filePath: string, fileData: string) => {
+	return invoke('append_file', {
+		targetFilePath: filePath,
+		stringData: fileData,
+	});
+};
+
+const requestWindowShow = async (windowLabel: string) =>
+	invoke('request_window_show', {
+		windowLabel,
+	});
 
 export const Invokers = {
 	showSplashWindow,
 	showMainWindow,
 	showSettingsWindow,
 	showTestWindow,
+	requestWindowShow,
+	appendFile,
 	getCpuInfo,
 	getExePath,
 	runTest,

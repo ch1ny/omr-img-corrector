@@ -5,6 +5,7 @@
 
 use tauri::Manager;
 
+mod file_handlers;
 mod hardware;
 mod test;
 
@@ -50,6 +51,15 @@ async fn get_exe_path(_window: tauri::Window) -> String {
 }
 
 #[tauri::command]
+async fn request_window_show(window_label: String, window: tauri::Window) {
+    let target_window = window.get_window(&window_label);
+    match target_window {
+        Some(tw) => tw.emit("request_show", ()).unwrap(),
+        None => (),
+    }
+}
+
+#[tauri::command]
 async fn exit_app() {
     // 退出程序
     std::process::exit(1);
@@ -64,6 +74,8 @@ fn main() {
             show_test_window,
             get_exe_path,
             exit_app,
+            request_window_show,
+            file_handlers::append_file,
             test::run_test,
             hardware::system_cpu_info,
             hardware::system_hardware_info,
