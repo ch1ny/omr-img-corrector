@@ -124,7 +124,7 @@
 				"width": 800,
 				"height": 600,
 				"resizable": true,
-				"title": "Test",
+				"title": "Benchmark",
 				"center": true,
 				"visible": false,
 				"label": "test",

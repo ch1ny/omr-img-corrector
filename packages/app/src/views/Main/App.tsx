@@ -16,13 +16,17 @@ function App() {
 						<Button
 							variant='outlined'
 							startIcon={<SettingIcon />}
-							onClick={Invokers.showSettingsWindow}
+							onClick={() => Invokers.requestWindowShow('settings')}
 						>
 							设置
 						</Button>
 					</div>
 					<div className={styles.headerButton}>
-						<Button variant='outlined' startIcon={<FireIcon />} onClick={Invokers.showTestWindow}>
+						<Button
+							variant='outlined'
+							startIcon={<FireIcon />}
+							onClick={() => Invokers.requestWindowShow('test')}
+						>
 							测试
 						</Button>
 					</div>

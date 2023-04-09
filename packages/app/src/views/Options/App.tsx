@@ -1,7 +1,8 @@
 import useMount from '@/hooks/useMount';
-import { restoreAppParams } from '@/utils';
+import { Invokers, restoreAppParams } from '@/utils';
 import { Button, Divider } from '@mui/material';
-import { useMemo } from 'react';
+import { event } from '@tauri-apps/api';
+import { useEffect, useMemo, useState } from 'react';
 import styles from './App.module.less';
 import OutDir from './Items/OutDir';
 import Params from './Items/Params';
@@ -27,6 +28,21 @@ const renderOptionsFromTemplate = (template: TOptionItem[]) => {
 
 function App() {
 	useMount(onAppStart);
+	const [initStatus] = useState(onAppStart());
+	useEffect(() => {
+		const unListen = event.listen('request_show', async ({ windowLabel }) => {
+			if (windowLabel !== 'settings') return;
+
+			await initStatus;
+			await Invokers.showSettingsWindow();
+		});
+
+		return () => {
+			unListen.then((unListenFn) => {
+				unListenFn();
+			});
+		};
+	}, []);
 
 	const renderedOptions = useMemo(
 		() =>

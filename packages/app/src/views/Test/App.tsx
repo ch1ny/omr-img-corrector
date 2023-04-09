@@ -46,7 +46,9 @@ type TestInfo = {
 function App() {
 	const [initStatus] = useState(onAppStart());
 	useEffect(() => {
-		const unListen = event.listen('request_show', async () => {
+		const unListen = event.listen('request_show', async ({ windowLabel }) => {
+			if (windowLabel !== 'test') return;
+
 			await initStatus;
 			await Invokers.showTestWindow();
 		});
@@ -74,6 +76,8 @@ function App() {
 	const [testResult, setTestResult] = useState<TestResult | null>(null);
 	useEffect(() => {
 		const unListenTestResult = event.listen('test_result', (ev) => {
+			if (ev.windowLabel !== 'test') return;
+
 			setTestInfo((currentTestInfo) => {
 				const receivedResult = ev.payload as TestResult;
 				if (receivedResult.test_id !== currentTestInfo.testId) return currentTestInfo;
@@ -93,6 +97,8 @@ function App() {
 			});
 		});
 		const unListenTestProgress = event.listen('run_test_progress_event', (ev) => {
+			if (ev.windowLabel !== 'test') return;
+
 			const payload = ev.payload as RunTestProgressEventPayload;
 
 			const getNewProgress = (oldProgress: MethodTestProgress): MethodTestProgress => {
