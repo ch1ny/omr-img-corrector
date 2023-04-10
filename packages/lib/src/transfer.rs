@@ -16,6 +16,16 @@ use crate::{
 pub struct TransformableMatrix {
     matrix: Mat,
 }
+impl ToOwned for TransformableMatrix {
+    fn to_owned(&self) -> Self::Owned {
+        Self {
+            matrix: self.matrix.to_owned(),
+        }
+    }
+
+    type Owned = TransformableMatrix;
+}
+
 impl TransformableMatrix {
     /// 生成默认 Mat 对象
     pub fn default() -> Self {
