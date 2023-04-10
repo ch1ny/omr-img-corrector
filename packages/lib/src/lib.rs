@@ -8,6 +8,8 @@ pub mod fft;
 
 pub mod hough;
 
+pub mod projection;
+
 pub mod transfer;
 
 pub mod types;
