@@ -1,4 +1,3 @@
-import useMount from '@/hooks/useMount';
 import { Invokers, restoreAppParams } from '@/utils';
 import { Button, Divider } from '@mui/material';
 import { event } from '@tauri-apps/api';
@@ -27,7 +26,6 @@ const renderOptionsFromTemplate = (template: TOptionItem[]) => {
 };
 
 function App() {
-	useMount(onAppStart);
 	const [initStatus] = useState(onAppStart());
 	useEffect(() => {
 		const unListen = event.listen('request_show', async ({ windowLabel }) => {
