@@ -1,10 +1,7 @@
 use oics::{
     self,
     core::{self, Scalar},
-    imgcodecs,
-    imgproc,
-    // prelude::MatTraitConstManual,
-    transfer,
+    imgcodecs, imgproc, transfer,
     types::{ImageFormat, RotateClipStrategy},
 };
 use rand::Rng;
@@ -118,7 +115,18 @@ fn run_test(p: bool, h: bool, f: bool) {
         if f {
             let fft_start = instant.elapsed().as_millis();
 
-            let fft_angle = oics::fft::get_angle_with_fft(&original_image).unwrap();
+            let gray_image = transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+
+            let fft_angle = oics::fft::get_angle_with_fft(
+                &gray_image,
+                125.0,
+                150.0,
+                150.0,
+                75.0,
+                file_name,
+                "C:/Users/10563/Desktop/result/canny/",
+            )
+            .unwrap();
             transfer::rotate_mat(
                 &original_image,
                 fft_angle,
@@ -220,5 +228,5 @@ fn run_test(p: bool, h: bool, f: bool) {
 }
 
 fn main() {
-    run_test(true, true, true);
+    run_test(false, false, true);
 }
