@@ -156,6 +156,8 @@ function App() {
 					maxLineGap: libParams.houghMaxLineGap,
 				},
 				fft: {
+					cannyThresholdLower: libParams.fftCannyThresholdLower,
+					cannyThresholdHigher: libParams.fftCannyThresholdHigher,
 					minLineLength: libParams.fftMinLineLength,
 					maxLineGap: libParams.fftMaxLineGap,
 				},

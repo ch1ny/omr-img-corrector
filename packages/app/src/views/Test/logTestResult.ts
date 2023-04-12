@@ -59,6 +59,8 @@ export default async function (result: OutputTestResult) {
 		`[PROJECTION | IMAGE_RESIZE_SCALE] ${result.params.projection.imageResizeScale}`,
 		`[HOUGH | MIN_LINE_LENGTH] ${result.params.hough.minLineLength}`,
 		`[HOUGH | MAX_LINE_GAP] ${result.params.hough.maxLineGap}`,
+		`[FFT | CANNY_THRESHOLD_1] ${result.params.fft.cannyThresholdLower}`,
+		`[FFT | CANNY_THRESHOLD_2] ${result.params.fft.cannyThresholdHigher}`,
 		`[FFT | MIN_LINE_LENGTH] ${result.params.fft.minLineLength}`,
 		`[FFT | MAX_LINE_GAP] ${result.params.fft.maxLineGap}`,
 		`=== [ TEST RESULT ] ===`,

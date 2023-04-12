@@ -64,7 +64,7 @@ const runTest = async (testId: number, params: ReturnType<typeof getLibParams>) 
 	}
 	const testOutputDir = path.resolveSync(Paths.exePath, '..', 'resources', 'test', 'result');
 	await Promise.all(
-		['edges', 'fft', 'hough', 'projection'].map(async (dirName) => {
+		['edges', 'fft', 'hough', 'projection', 'fft_lined'].map(async (dirName) => {
 			if (!(await fs.exists(path.resolveSync(testOutputDir, dirName)))) {
 				await fs.createDir(path.resolveSync(testOutputDir, dirName));
 			}

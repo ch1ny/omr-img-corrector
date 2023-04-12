@@ -37,6 +37,8 @@ export const getLibParams = () => {
 		maxLineGap: 15.0,
 	});
 	const fftParams = getValueFromLocalStorageByKey<IFftParams>('fft_params', {
+		cannyThresholdLower: 125.0,
+		cannyThresholdHigher: 150.0,
 		minLineLength: 125.0,
 		maxLineGap: 15.0,
 	});
@@ -49,6 +51,8 @@ export const getLibParams = () => {
 		projectionResizeScale: projectionParams.imageResizeScale || 0.2,
 		houghMinLineLength: houghParams.minLineLength || 125.0,
 		houghMaxLineGap: houghParams.maxLineGap || 5.0,
+		fftCannyThresholdLower: fftParams.cannyThresholdLower || 125.0,
+		fftCannyThresholdHigher: fftParams.cannyThresholdHigher || 150.0,
 		fftMinLineLength: fftParams.minLineLength || 125.0,
 		fftMaxLineGap: fftParams.maxLineGap || 5.0,
 	};

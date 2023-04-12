@@ -93,19 +93,19 @@ const SystemInfo = () => {
 			<div className={styles.infoContent}>
 				<div className={styles.infoItem}>
 					<div>显卡型号</div>
-					<div>{hardwareInfo.gpu.renderer}</div>
+					<div>{hardwareInfo?.gpu.renderer || 'xxx'}</div>
 				</div>
 				<div className={styles.infoItem}>
 					<div>处理器型号</div>
-					<div>{hardwareInfo.cpu.chipName}</div>
+					<div>{hardwareInfo?.cpu.chipName || 'xxx'}</div>
 				</div>
 				<div className={styles.infoItem}>
 					<div>处理器核心数</div>
-					<div>{hardwareInfo.cpu.physicalCoreCounts}</div>
+					<div>{hardwareInfo?.cpu.physicalCoreCounts || 'xxx'}</div>
 				</div>
 				<div className={styles.infoItem}>
 					<div>处理器最大处理线程</div>
-					<div>{hardwareInfo.cpu.maxThreadCounts}</div>
+					<div>{hardwareInfo?.cpu.maxThreadCounts || 'xxx'}</div>
 				</div>
 			</div>
 		</div>

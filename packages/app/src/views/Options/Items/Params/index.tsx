@@ -10,6 +10,7 @@ import {
 	Slider,
 	Typography,
 } from '@mui/material';
+import { useCallback } from 'react';
 import styles from './index.module.less';
 
 const ProjectionParams = () => {
@@ -159,10 +160,55 @@ const HoughParams = () => {
 const FftParams = () => {
 	const [fftParams, setFftParams] = useLocalStorage<IFftParams>('fft_params', {
 		defaultValue: {
-			minLineLength: 125.0,
-			maxLineGap: 15.0,
+			cannyThresholdLower: 125.0,
+			cannyThresholdHigher: 150.0,
+			minLineLength: 150.0,
+			maxLineGap: 75.0,
 		},
 	});
+
+	const updateCannyThresholdLower = useCallback(
+		(ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			setFftParams((fftParams) => ({
+				...fftParams,
+				cannyThresholdLower: Math.min(
+					Math.max(parseFloat(ev.target.value), 0.0),
+					fftParams.cannyThresholdHigher
+				),
+			}));
+		},
+		[]
+	);
+	const updateCannyThresholdHigher = useCallback(
+		(ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			setFftParams((fftParams) => ({
+				...fftParams,
+				cannyThresholdHigher: Math.max(
+					Math.min(parseFloat(ev.target.value), 255.0),
+					fftParams.cannyThresholdLower
+				),
+			}));
+		},
+		[]
+	);
+	const updateMinLineLength = useCallback(
+		(ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			setFftParams((fftParams) => ({
+				...fftParams,
+				minLineLength: Math.max(parseFloat(ev.target.value), 1),
+			}));
+		},
+		[]
+	);
+	const updateMaxLineGap = useCallback(
+		(ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			setFftParams((fftParams) => ({
+				...fftParams,
+				maxLineGap: Math.max(parseFloat(ev.target.value), 1),
+			}));
+		},
+		[]
+	);
 
 	return (
 		<div className={styles.fftParams}>
@@ -170,6 +216,41 @@ const FftParams = () => {
 				<AccordionSummary expandIcon={<DownIcon />}>快速傅里叶变换方案参数</AccordionSummary>
 				<Divider />
 				<AccordionDetails style={{ paddingTop: '16px' }}>
+					<div className={styles.param} style={{ display: 'flex' }}>
+						<Typography variant='body2'>多级过滤弱边缘阈值</Typography>
+						<div style={{ marginLeft: 'auto' }}>
+							<Input
+								size='small'
+								value={fftParams.cannyThresholdLower}
+								inputProps={{
+									step: 0.1,
+									min: 0.0,
+									max: fftParams.cannyThresholdHigher,
+									type: 'number',
+								}}
+								sx={{ width: '5em' }}
+								onChange={updateCannyThresholdLower}
+							/>
+						</div>
+					</div>
+					<Divider />
+					<div className={styles.param} style={{ display: 'flex' }}>
+						<Typography variant='body2'>多级过滤强边缘阈值</Typography>
+						<div style={{ marginLeft: 'auto' }}>
+							<Input
+								size='small'
+								value={fftParams.cannyThresholdHigher}
+								inputProps={{
+									step: 0.1,
+									min: 255.0,
+									type: 'number',
+								}}
+								sx={{ width: '5em' }}
+								onChange={updateCannyThresholdHigher}
+							/>
+						</div>
+					</div>
+					<Divider />
 					<div className={styles.param} style={{ display: 'flex' }}>
 						<Typography variant='body2'>可感知线段最小长度</Typography>
 						<div style={{ marginLeft: 'auto' }}>
@@ -182,12 +263,7 @@ const FftParams = () => {
 									type: 'number',
 								}}
 								sx={{ width: '5em' }}
-								onChange={(ev) => {
-									setFftParams({
-										...fftParams,
-										minLineLength: Math.max(parseFloat(ev.target.value), 1),
-									});
-								}}
+								onChange={updateMinLineLength}
 							/>
 						</div>
 					</div>
@@ -204,12 +280,7 @@ const FftParams = () => {
 									type: 'number',
 								}}
 								sx={{ width: '5em' }}
-								onChange={(ev) => {
-									setFftParams({
-										...fftParams,
-										maxLineGap: Math.max(parseFloat(ev.target.value), 1),
-									});
-								}}
+								onChange={updateMaxLineGap}
 							/>
 						</div>
 					</div>

@@ -241,6 +241,10 @@ pub fn run_test(
     projection_resize_scale: f64,
     hough_min_line_length: f64,
     hough_max_line_gap: f64,
+    fft_canny_threshold_lower: f64,
+    fft_canny_threshold_higher: f64,
+    fft_min_line_length: f64,
+    fft_max_line_gap: f64,
     window: tauri::Window,
 ) -> usize {
     thread::spawn(move || {
@@ -439,7 +443,17 @@ pub fn run_test(
         for (original_image, random_angle, file_name) in &original_images_vec {
             let fft_start = instant.elapsed().as_millis();
 
-            let fft_angle = oics::fft::get_angle_with_fft(&original_image).unwrap();
+            let gray_image = transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+            let fft_angle = oics::fft::get_angle_with_fft(
+                &gray_image,
+                fft_canny_threshold_lower,
+                fft_canny_threshold_higher,
+                fft_min_line_length,
+                fft_max_line_gap,
+                &file_name,
+                &(String::from(OUTPUT_DIR_PATH) + &"/fft_lined/"),
+            )
+            .unwrap();
             transfer::rotate_mat(
                 &original_image,
                 fft_angle,

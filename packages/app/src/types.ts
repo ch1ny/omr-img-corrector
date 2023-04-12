@@ -42,6 +42,8 @@ export interface IHoughParams {
 }
 
 export interface IFftParams {
+	cannyThresholdLower: number;
+	cannyThresholdHigher: number;
 	minLineLength: number;
 	maxLineGap: number;
 }
