@@ -200,7 +200,7 @@ function App() {
 					</div>
 					<div className={styles.progress}>
 						<LinearProgress
-							color={houghTestProgress.status === 'PROCESSED' ? 'success' : 'secondary'}
+							color={houghTestProgress.status === 'PROCESSED' ? 'success' : 'primary'}
 							variant={
 								testInfo.testId !== 0 && houghTestProgress.status === 'WAITING'
 									? 'indeterminate'
@@ -211,7 +211,7 @@ function App() {
 					</div>
 					<div className={styles.progress}>
 						<LinearProgress
-							color={fftTestProgress.status === 'PROCESSED' ? 'success' : 'warning'}
+							color={fftTestProgress.status === 'PROCESSED' ? 'success' : 'primary'}
 							variant={
 								testInfo.testId !== 0 && fftTestProgress.status === 'WAITING'
 									? 'indeterminate'
