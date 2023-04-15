@@ -32,6 +32,7 @@ function App() {
 					</div>
 				</div>
 				<Divider />
+				<div className={styles.main}></div>
 			</div>
 		</div>
 	);
