@@ -69,7 +69,7 @@ pub fn correct_default(
     projection_resize_scale: f64,
     hough_min_line_length: f64,
     hough_max_line_gap: f64,
-) -> opencv::Result<bool> {
+) -> opencv::Result<(f64, bool)> {
     let src_mat = imgcodecs::imread(input_file, imgcodecs::IMREAD_COLOR)?;
 
     // 找出旋转角度以及是否需要复查
@@ -77,10 +77,26 @@ pub fn correct_default(
         // 先使用基本的投影标准差方法进行纠偏
         let (projection_angle, projection_result_status) = {
             let scaled_mat = {
-                let mut scaled = Mat::default();
-                let size = src_mat.size()?;
-                imgproc::resize(
+                let mut eroded = Mat::default();
+                let kernel = imgproc::get_structuring_element(
+                    imgproc::MORPH_ELLIPSE,
+                    opencv::core::Size::new(3, 3),
+                    opencv::core::Point::new(-1, -1),
+                )?;
+                imgproc::erode(
                     &src_mat,
+                    &mut eroded,
+                    &kernel,
+                    opencv::core::Point::new(-1, -1),
+                    3,
+                    opencv::core::BORDER_CONSTANT,
+                    imgproc::morphology_default_border_value()?,
+                )?;
+
+                let mut scaled = Mat::default();
+                let size = eroded.size()?;
+                imgproc::resize(
+                    &eroded,
                     &mut scaled,
                     Size2i::new(
                         ((size.width as f64) * projection_resize_scale) as i32,
@@ -194,14 +210,11 @@ pub fn correct_default(
                 }
 
                 if possible_horizontal_counts == 1 && possible_vertical_counts == 1 {
-                    let target_angle = ((most_possible_deg_vec[0] as f64)
-                        - (projection_range_max_angle as f64))
-                        * projection_angle_step;
+                    let target_angle = most_possible_deg_vec[0] as f64 * projection_angle_step;
                     (target_angle, ProjectionResultStatus::Believed)
                 } else if most_possible_deg_vec.len() == 1 {
                     (
-                        ((most_possible_deg_vec[0] as f64) - (projection_range_max_angle as f64))
-                            * projection_angle_step,
+                        most_possible_deg_vec[0] as f64 * projection_angle_step,
                         ProjectionResultStatus::NeedCheck,
                     )
                 } else {
@@ -329,5 +342,5 @@ pub fn correct_default(
         imgcodecs::imwrite(output_file, &rotated_mat, &quality_vec)?;
     };
 
-    Ok(need_check)
+    Ok((rotate_angle, need_check))
 }
