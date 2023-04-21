@@ -21,6 +21,7 @@
 		"powf",
 		"stitching",
 		"video",
-		"videoio"
+		"videoio",
+		"walkdir"
 	]
 }

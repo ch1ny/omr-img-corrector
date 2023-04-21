@@ -230,3 +230,75 @@ fn run_test(p: bool, h: bool, f: bool) {
 fn main() {
     run_test(false, false, true);
 }
+
+// 测试
+#[cfg(test)]
+mod tests {
+    use oics::{
+        self,
+        core::{self, Scalar},
+        imgcodecs, imgproc, omr, transfer,
+        types::{ImageFormat, RotateClipStrategy},
+    };
+    use rand::Rng;
+    use std::path::Path;
+
+    use crate::DATA_SET_DIR_PATH;
+
+    #[test]
+    fn lib_omr() {
+        let mut random = rand::thread_rng();
+
+        for entry in walkdir::WalkDir::new(DATA_SET_DIR_PATH) {
+            let this_entry = entry.unwrap();
+            if !this_entry.metadata().unwrap().is_file() {
+                continue;
+            }
+
+            let filepath = this_entry.path().display();
+            let input_file_path = &filepath.to_string();
+            let file_name = this_entry.file_name().to_str().unwrap();
+
+            let random_angle = random.gen_range(-10.0..10.0);
+            let original_image = transfer::rotate_mat(
+                &transfer::TransformableMatrix::new(input_file_path, imgcodecs::IMREAD_COLOR)
+                    .unwrap(),
+                -random_angle,
+                1.0,
+                imgproc::INTER_LINEAR,
+                core::BORDER_CONSTANT,
+                Scalar::new(255.0, 255.0, 255.0, 0.0),
+                RotateClipStrategy::DEFAULT,
+            )
+            .unwrap();
+            original_image
+                .im_write("./tmp.jpg", ImageFormat::JPEG, 100)
+                .unwrap();
+
+            let (result_angle, need_check) = omr::correct_default(
+                &"./tmp.jpg",
+                Path::new("C:/Users/10563/Desktop/result/projection")
+                    .join(file_name)
+                    .to_str()
+                    .unwrap(),
+                45,
+                0.2,
+                0.2,
+                150.0,
+                50.0,
+            )
+            .unwrap();
+
+            if !need_check {
+                assert!(
+                    (random_angle - result_angle).abs() < 0.4,
+                    "{}, {}",
+                    file_name,
+                    (random_angle - result_angle).abs()
+                );
+            } else {
+                println!("{}", file_name);
+            }
+        }
+    }
+}
