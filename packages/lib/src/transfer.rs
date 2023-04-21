@@ -137,7 +137,10 @@ impl TransformableMatrix {
     ///
     /// 用例
     /// ```rust
-    /// let src = TransformableMatrix::new("xxx.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
+    /// # use oics::transfer::TransformableMatrix;
+    /// # use opencv::{imgcodecs, imgproc};
+    ///
+    /// let src = TransformableMatrix::new("01234.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
     /// let dilated = src.dilate(
     ///     imgproc::MORPH_ELLIPSE,
     ///     opencv::core::Size::new(3, 3),
@@ -182,7 +185,10 @@ impl TransformableMatrix {
     ///
     /// 用例
     /// ```rust
-    /// let src = TransformableMatrix::new("xxx.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
+    /// # use oics::transfer::TransformableMatrix;
+    /// # use opencv::{imgcodecs, imgproc};
+    ///
+    /// let src = TransformableMatrix::new("01234.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
     /// let eroded = src.erode(
     ///     imgproc::MORPH_ELLIPSE,
     ///     opencv::core::Size::new(3, 3),
