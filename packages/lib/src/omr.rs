@@ -289,7 +289,14 @@ pub fn correct_default(
 
                     // 返回旋转角度 target_angle
                     match projection_result_status {
-                        ProjectionResultStatus::NeedCheck => (target_angle as f64, true),
+                        ProjectionResultStatus::NeedCheck => {
+                            // 当两种方案偏差超过 0.1° 时判定需要额外检查
+                            if (projection_angle - target_angle as f64).abs() >= 0.1 {
+                                (target_angle as f64, true)
+                            } else {
+                                (projection_angle, false)
+                            }
+                        }
                         ProjectionResultStatus::NotAResult => (target_angle as f64, true),
                         _ => unreachable!(),
                     }
