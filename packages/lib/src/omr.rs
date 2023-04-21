@@ -77,6 +77,13 @@ pub fn correct_default(
         // 先使用基本的投影标准差方法进行纠偏
         let (projection_angle, projection_result_status) = {
             let scaled_mat = {
+                let gray_mat = {
+                    let mut dst_mat = Mat::default();
+                    imgproc::cvt_color(&src_mat, &mut dst_mat, imgproc::COLOR_RGB2GRAY, 0)?;
+                    dst_mat
+                };
+
+                // 先对输入图像进行腐蚀预处理以提升图像锐度
                 let mut eroded = Mat::default();
                 let kernel = imgproc::get_structuring_element(
                     imgproc::MORPH_ELLIPSE,
@@ -84,7 +91,7 @@ pub fn correct_default(
                     opencv::core::Point::new(-1, -1),
                 )?;
                 imgproc::erode(
-                    &src_mat,
+                    &gray_mat,
                     &mut eroded,
                     &kernel,
                     opencv::core::Point::new(-1, -1),
@@ -112,15 +119,10 @@ pub fn correct_default(
                 )?;
                 scaled
             };
-            let gray_scaled_mat = {
-                let mut dst_mat = Mat::default();
-                imgproc::cvt_color(&scaled_mat, &mut dst_mat, imgproc::COLOR_RGB2GRAY, 0)?;
-                dst_mat
-            };
             let thresh_binary_mat = {
                 let mut dst_mat = Mat::default();
                 imgproc::threshold(
-                    &gray_scaled_mat,
+                    &scaled_mat,
                     &mut dst_mat,
                     127.0,
                     255.0,
