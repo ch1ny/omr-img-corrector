@@ -128,6 +128,97 @@ impl TransformableMatrix {
             matrix: self.matrix.clone(),
         }
     }
+
+    /// 图像膨胀处理
+    /// `kernel_shape`: 图形处理核形状参数,
+    /// `kernel_size`: 图形处理核尺寸,
+    /// `anchor`: 膨胀处理锚点,
+    /// `iterations`: 迭代次数
+    ///
+    /// 用例
+    /// ```rust
+    /// # use oics::transfer::TransformableMatrix;
+    /// # use opencv::{imgcodecs, imgproc};
+    ///
+    /// let src = TransformableMatrix::new("01234.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
+    /// let dilated = src.dilate(
+    ///     imgproc::MORPH_ELLIPSE,
+    ///     opencv::core::Size::new(3, 3),
+    ///     opencv::core::Point::new(-1, -1),
+    ///     3
+    /// ).unwrap();
+    /// ```
+    pub fn dilate(
+        &self,
+        kernel_shape: i32,
+        kernel_size: opencv::core::Size,
+        anchor: opencv::core::Point,
+        iterations: i32,
+    ) -> opencv::Result<Self> {
+        let mat = &self.matrix;
+        let mut dilated = Mat::default();
+
+        // let kernel = imgproc::get_structuring_element(
+        //     imgproc::MORPH_ELLIPSE,
+        //     opencv::core::Size::new(3, 3),
+        //     opencv::core::Point::new(-1, -1),
+        // )?;
+        let kernel = imgproc::get_structuring_element(kernel_shape, kernel_size, anchor)?;
+        imgproc::dilate(
+            &mat,
+            &mut dilated,
+            &kernel,
+            anchor,
+            iterations,
+            opencv::core::BORDER_CONSTANT,
+            imgproc::morphology_default_border_value()?,
+        )?;
+
+        Ok(Self { matrix: dilated })
+    }
+
+    /// 图像腐蚀处理
+    /// `kernel_shape`: 图形处理核形状参数,
+    /// `kernel_size`: 图形处理核尺寸,
+    /// `anchor`: 腐蚀处理锚点,
+    /// `iterations`: 迭代次数
+    ///
+    /// 用例
+    /// ```rust
+    /// # use oics::transfer::TransformableMatrix;
+    /// # use opencv::{imgcodecs, imgproc};
+    ///
+    /// let src = TransformableMatrix::new("01234.jpg", imgcodecs::IMREAD_GRAYSCALE).unwrap();
+    /// let eroded = src.erode(
+    ///     imgproc::MORPH_ELLIPSE,
+    ///     opencv::core::Size::new(3, 3),
+    ///     opencv::core::Point::new(-1, -1),
+    ///     3
+    /// ).unwrap();
+    /// ```
+    pub fn erode(
+        &self,
+        kernel_shape: i32,
+        kernel_size: opencv::core::Size,
+        anchor: opencv::core::Point,
+        iterations: i32,
+    ) -> opencv::Result<Self> {
+        let mat = &self.matrix;
+        let mut eroded = Mat::default();
+
+        let kernel = imgproc::get_structuring_element(kernel_shape, kernel_size, anchor)?;
+        imgproc::erode(
+            &mat,
+            &mut eroded,
+            &kernel,
+            anchor,
+            iterations,
+            opencv::core::BORDER_CONSTANT,
+            imgproc::morphology_default_border_value()?,
+        )?;
+
+        Ok(Self { matrix: eroded })
+    }
 }
 
 unsafe impl Sync for TransformableMatrix {}

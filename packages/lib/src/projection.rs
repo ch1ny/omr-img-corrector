@@ -127,7 +127,7 @@ pub fn get_angle_with_projections(
             {
                 // 处理垂直投影数据
                 let vertical_vec = standard_deviations.0;
-                let mut vertical_possibles: (f64, Vec<usize>) = (vertical_vec[0], vec![0]);
+                let mut vertical_possibles: (f64, Vec<usize>) = (vertical_vec[0], vec![0]); // (投影标准差值, 等于该值的角度)
                 for (index, val) in vertical_vec.iter().enumerate() {
                     if *val > vertical_possibles.0 {
                         vertical_possibles.0 = *val;
@@ -139,7 +139,7 @@ pub fn get_angle_with_projections(
 
                 // 处理水平投影数据
                 let horizontal_vec = standard_deviations.1;
-                let mut horizontal_possibles: (f64, Vec<usize>) = (horizontal_vec[0], vec![0]);
+                let mut horizontal_possibles: (f64, Vec<usize>) = (horizontal_vec[0], vec![0]); // (投影标准差值, 等于该值的角度)
                 for (index, val) in horizontal_vec.iter().enumerate() {
                     if *val > horizontal_possibles.0 {
                         horizontal_possibles.0 = *val;
