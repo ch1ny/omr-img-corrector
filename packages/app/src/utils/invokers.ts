@@ -1,5 +1,7 @@
+import * as tauriPath from '@tauri-apps/api/path';
 import path from '@/core/path';
 import { ICpuInfo } from '@/types';
+import { ITaskProps } from '@/views/Main/Task';
 import { fs, invoke } from '@tauri-apps/api';
 import type { getLibParams } from './getLibParams';
 import { Paths } from './paths';
@@ -91,6 +93,21 @@ const requestWindowShow = async (windowLabel: string) =>
 		windowLabel,
 	});
 
+const addTask = async (taskProps: ITaskProps) => {
+	const fileName = await tauriPath.basename(taskProps.src);
+
+	invoke('add_task', {
+		taskId: taskProps.id,
+		inputFile: taskProps.src,
+		outputFile: path.resolveSync(taskProps.omrConfig.outputDir, `${fileName}.jpg`),
+		projectionMaxAngle: taskProps.omrConfig.projectionMaxAngle,
+		projectionAngleStep: taskProps.omrConfig.projectionAngleStep,
+		projectionResizeScale: taskProps.omrConfig.projectionResizeScale,
+		houghMinLineLength: taskProps.omrConfig.houghMinLineLength,
+		houghMaxLineGap: taskProps.omrConfig.houghMaxLineGap,
+	});
+};
+
 export const Invokers = {
 	showSplashWindow,
 	showMainWindow,
@@ -102,4 +119,5 @@ export const Invokers = {
 	getExePath,
 	runTest,
 	exitApp,
+	addTask,
 };

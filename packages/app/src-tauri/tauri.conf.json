@@ -34,6 +34,11 @@
 				"relaunch": true,
 				"relaunchDangerousAllowSymlinkMacos": false
 			},
+			"protocol": {
+				"all": true,
+				"asset": true,
+				"assetScope": ["**"]
+			},
 			"shell": {
 				"all": false,
 				"open": true
@@ -76,7 +81,7 @@
 			}
 		},
 		"security": {
-			"csp": null
+			"csp": "img-src 'self' asset: https://asset.localhost;"
 		},
 		"updater": {
 			"active": false

@@ -1,18 +1,121 @@
-import { FireIcon, SettingIcon } from '@/components';
+import { FileImageIcon, FireIcon, FolderAddIcon, SettingIcon } from '@/components';
 import useMount from '@/hooks/useMount';
-import { Invokers } from '@/utils';
+import { getLibParams, Invokers } from '@/utils';
 import { Button, Divider } from '@mui/material';
+import * as fs from '@tauri-apps/api/fs';
+import * as dialog from '@tauri-apps/api/dialog';
+import { useCallback, useState } from 'react';
 import styles from './App.module.less';
 import onAppStart from './onAppStart';
+import Task, { ITaskProps } from './Task';
 
 function App() {
 	useMount(onAppStart);
+
+	const [tasks, setTasks] = useState<Array<ITaskProps>>([]);
+
+	const addTasks = useCallback((newTasks: ITaskProps[]) => {
+		setTasks((oldTasks) => [...oldTasks, ...newTasks]);
+	}, []);
+	const importFileTask = useCallback(async () => {
+		let selected = await dialog.open({
+			multiple: true,
+			filters: [
+				{
+					name: 'Image',
+					extensions: ['png', 'jpeg'],
+				},
+			],
+		});
+		if (!selected) return;
+
+		if (!Array.isArray(selected)) {
+			selected = [selected];
+		}
+
+		const {
+			outputDir,
+			projectionMaxAngle,
+			projectionAngleStep,
+			projectionResizeScale,
+			houghMinLineLength,
+			houghMaxLineGap,
+		} = getLibParams();
+		const taskGroupId = Date.now();
+		const newTasks: ITaskProps[] = selected.map((src, idx) => ({
+			id: taskGroupId + idx,
+			src,
+			omrConfig: {
+				outputDir,
+				projectionMaxAngle,
+				projectionAngleStep,
+				projectionResizeScale,
+				houghMinLineLength,
+				houghMaxLineGap,
+			},
+		}));
+		addTasks(newTasks);
+	}, []);
+	const importFolderTask = useCallback(async () => {
+		const selected = await dialog.open({
+			multiple: false,
+			directory: true,
+		});
+		if (!selected) return;
+
+		const {
+			outputDir,
+			projectionMaxAngle,
+			projectionAngleStep,
+			projectionResizeScale,
+			houghMinLineLength,
+			houghMaxLineGap,
+		} = getLibParams();
+		const taskGroupId = Date.now();
+		const newTasks: ITaskProps[] = (await fs.readDir(selected as string))
+			.filter(
+				({ path }) => path.endsWith('.png') || path.endsWith('.jpeg') || path.endsWith('.jpg')
+			)
+			.map(({ path: src }, idx) => ({
+				id: taskGroupId + idx,
+				src,
+				omrConfig: {
+					outputDir,
+					projectionMaxAngle,
+					projectionAngleStep,
+					projectionResizeScale,
+					houghMinLineLength,
+					houghMaxLineGap,
+				},
+			}));
+		addTasks(newTasks);
+	}, []);
 
 	return (
 		<div className={styles.app}>
 			<div className={styles.content}>
 				<div className={styles.header}>
 					<div className={styles.headerButton}>
+						<Button
+							variant='outlined'
+							startIcon={<FileImageIcon />}
+							onClick={importFileTask}
+							title={'导入图片'}
+						>
+							导入
+						</Button>
+					</div>
+					<div className={styles.headerButton}>
+						<Button
+							variant='outlined'
+							startIcon={<FolderAddIcon />}
+							onClick={importFolderTask}
+							title={'导入文件夹'}
+						>
+							导入
+						</Button>
+					</div>
+					<div className={styles.headerButton} style={{ marginLeft: 'auto' }}>
 						<Button
 							variant='outlined'
 							startIcon={<SettingIcon />}
@@ -32,7 +135,11 @@ function App() {
 					</div>
 				</div>
 				<Divider />
-				<div className={styles.main}></div>
+				<div className={styles.main}>
+					{tasks.map(({ id, src, omrConfig }) => (
+						<Task id={id} src={src} omrConfig={omrConfig} key={id} />
+					))}
+				</div>
 			</div>
 		</div>
 	);

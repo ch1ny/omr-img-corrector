@@ -7,6 +7,7 @@ use tauri::Manager;
 
 mod file_handlers;
 mod hardware;
+mod task;
 mod test;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -76,6 +77,7 @@ fn main() {
             exit_app,
             request_window_show,
             file_handlers::append_file,
+            task::add_task,
             test::run_test,
             hardware::system_cpu_info,
             hardware::system_hardware_info,
