@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import * as event from '@tauri-apps/api/event';
 import styles from './index.module.less';
-import { Button, Divider, LinearProgress } from '@mui/material';
+import { Button, Chip, CircularProgress, Divider, LinearProgress } from '@mui/material';
 import { Invokers } from '@/utils';
+import { CaretRightIcon, CheckIcon, CloseIcon, DeleteIcon, ExclamationIcon } from '@/components';
 
 export interface ITaskProps {
 	id: number;
@@ -20,18 +21,27 @@ export interface ITaskProps {
 
 type TTaskStatus = 'ready' | 'waiting' | 'running' | 'finished' | 'debatable' | 'error';
 
-export default (props: ITaskProps) => {
-	const { id, src } = props;
+export interface ITaskRef {
+	runTask: () => void;
+}
+
+interface ITaskComponentProps extends ITaskProps {
+	onDelete?: React.MouseEventHandler<HTMLDivElement>;
+}
+
+export default forwardRef<ITaskRef, ITaskComponentProps>((props, ref) => {
+	const { id, src, omrConfig, onDelete } = props;
 	const previewSrc = useMemo(() => convertFileSrc(src), [src]);
 
 	const [status, setStatus] = useState<TTaskStatus>('ready');
 
 	useEffect(() => {
 		const unListenOnTaskRunning = event.listen('start_running_task', (ev) => {
+			// console.log(ev);
 			if (ev.windowLabel !== 'main') return;
 
-			const { taskId } = ev.payload as { taskId: number };
-			if (taskId !== id) return;
+			const { task_id } = ev.payload as { task_id: number };
+			if (task_id !== id) return;
 			setStatus((currentStatus) => {
 				if (currentStatus !== 'waiting') return currentStatus;
 
@@ -39,12 +49,13 @@ export default (props: ITaskProps) => {
 			});
 		});
 		const unListenOnTaskCompleted = event.listen('task_completed', (ev) => {
+			// console.log(ev);
 			if (ev.windowLabel !== 'main') return;
-			const { taskId, result } = ev.payload as {
-				taskId: number;
+			const { task_id, result } = ev.payload as {
+				task_id: number;
 				result: 'finished' | 'debatable' | 'error';
 			};
-			if (taskId !== id) return;
+			if (task_id !== id) return;
 			setStatus((currentStatus) => {
 				if (currentStatus !== 'running') return currentStatus;
 
@@ -71,11 +82,19 @@ export default (props: ITaskProps) => {
 			};
 		}
 	}, [status, props]);
+	useImperativeHandle(
+		ref,
+		() => ({
+			runTask,
+		}),
+		[runTask]
+	);
 
 	/* 管理进度条状态 */
 	const progressColor = useMemo(() => {
 		switch (status) {
 			case 'ready':
+				return 'secondary';
 			case 'waiting':
 			case 'running':
 				return 'primary';
@@ -102,6 +121,44 @@ export default (props: ITaskProps) => {
 		}
 	}, [status]);
 
+	/* 管理 Chip 状态 */
+	const [chipLabel, chipIcon] = useMemo(() => {
+		switch (status) {
+			case 'debatable':
+				return [
+					'待确认',
+					<div style={{ fontSize: '1.25em' }}>
+						<ExclamationIcon />
+					</div>,
+				];
+			case 'error':
+				return [
+					'已失败',
+					<div style={{ fontSize: '1.25em' }}>
+						<CloseIcon />
+					</div>,
+				];
+			case 'finished':
+				return [
+					'已完成',
+					<div style={{ fontSize: '1.25em' }}>
+						<CheckIcon />
+					</div>,
+				];
+			case 'ready':
+				return [
+					'已就绪',
+					<div style={{ fontSize: '1.25em' }}>
+						<CaretRightIcon />
+					</div>,
+				];
+			case 'running':
+				return ['处理中', <CircularProgress size={'1.25em'} color={'primary'} />];
+			case 'waiting':
+				return ['等待中', <CircularProgress size={'1.25em'} color={'primary'} />];
+		}
+	}, [status]);
+
 	return (
 		<>
 			<div className={styles.task}>
@@ -109,22 +166,44 @@ export default (props: ITaskProps) => {
 					<img src={previewSrc} className={styles.previewImage} />
 				</div>
 				<div className={styles.status}>
-					<LinearProgress
-						sx={{ width: '100%' }}
-						color={progressColor}
-						variant={progressVariant}
-						value={progressValue}
-					/>
+					<div
+						style={{
+							width: '100%',
+							display: 'flex',
+							justifyContent: 'space-evenly',
+							fontSize: '0.75em',
+							fontWeight: 'bold',
+						}}
+					>
+						<div>{src}</div>
+					</div>
+					<div style={{ width: '100%' }}>
+						<LinearProgress
+							sx={{ width: '100%' }}
+							color={progressColor}
+							variant={progressVariant}
+							value={progressValue}
+						/>
+					</div>
 				</div>
 				<div className={styles.panel}>
 					<div>
-						<Button color='success' variant='contained' onClick={runTask}>
-							开始
-						</Button>
+						<Chip
+							label={chipLabel}
+							color={progressColor}
+							clickable={status === 'ready' || status === 'debatable'}
+							icon={chipIcon}
+							onClick={runTask}
+						/>
+					</div>
+					<div>
+						<div className={styles.delete} onClick={onDelete}>
+							<DeleteIcon />
+						</div>
 					</div>
 				</div>
 			</div>
 			<Divider />
 		</>
 	);
-};
+});
