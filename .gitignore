@@ -1,2 +1,8 @@
 *.lock
 packages/verify
+
+dataset/result/canny/*.jpg
+dataset/result/edges/*.jpg
+dataset/result/fft/*.jpg
+dataset/result/hough/*.jpg
+dataset/result/projection/*.jpg

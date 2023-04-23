@@ -7,7 +7,7 @@ use oics::{
 use rand::Rng;
 use std::{path::Path, time::Instant};
 
-const DATA_SET_DIR_PATH: &str = "C:/Users/10563/Desktop/dataset";
+const DATA_SET_DIR_PATH: &str = "../../dataset/dataset";
 fn run_test(p: bool, h: bool, f: bool) {
     let instant = Instant::now();
     let mut random = rand::thread_rng();
@@ -61,7 +61,7 @@ fn run_test(p: bool, h: bool, f: bool) {
 
             final_image
                 .im_write(
-                    Path::new("C:/Users/10563/Desktop/result/projection")
+                    Path::new("../../dataset/result/projection")
                         .join(file_name)
                         .to_str()
                         .unwrap(),
@@ -84,7 +84,7 @@ fn run_test(p: bool, h: bool, f: bool) {
                 125.0,
                 15.0,
                 file_name,
-                "C:/Users/10563/Desktop/result/edges/",
+                "../../dataset/result/edges/",
             )
             .unwrap();
             transfer::rotate_mat(
@@ -98,7 +98,7 @@ fn run_test(p: bool, h: bool, f: bool) {
             )
             .unwrap()
             .im_write(
-                Path::new("C:/Users/10563/Desktop/result/hough")
+                Path::new("../../dataset/result/hough")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
@@ -124,7 +124,7 @@ fn run_test(p: bool, h: bool, f: bool) {
                 150.0,
                 75.0,
                 file_name,
-                "C:/Users/10563/Desktop/result/canny/",
+                "../../dataset/result/canny/",
             )
             .unwrap();
             transfer::rotate_mat(
@@ -138,7 +138,7 @@ fn run_test(p: bool, h: bool, f: bool) {
             )
             .unwrap()
             .im_write(
-                Path::new("C:/Users/10563/Desktop/result/fft")
+                Path::new("../../dataset/result/fft")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
@@ -278,7 +278,7 @@ mod tests {
 
             let (result_angle, need_check) = omr::correct_default(
                 &"./tmp.jpg",
-                Path::new("C:/Users/10563/Desktop/result/projection")
+                Path::new("../../dataset/result/projection")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
