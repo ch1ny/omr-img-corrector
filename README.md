@@ -29,4 +29,36 @@ rust 部分引入 `lib` 库，使用线程池实现**针对单个图片的加速
 - 基于霍夫变换检测图中直线的方案
 - 基于快速傅里叶变换找寻图中主导线的方案
 
+## 如何开发
 
+### 安装 pnpm
+
+我们使用 `pnpm` 作为我们的包管理器。
+
+#### 使用 `npm` 全局安装 `pnpm`
+
+```bash
+npm install -g pnpm
+```
+
+或者
+
+```bash
+npm install -g @pnpm/exe
+```
+
+如果您的电脑上没有安装 `Node.js` 也可以使用以下脚本安装 `pnpm` 。
+
+使用 PowerShell：
+
+```bash
+iwr https://get.pnpm.io/install.ps1 -useb | iex
+```
+
+然后您可以使用 [`pnpm env`](https://pnpm.io/cli/env) 命令来安装 Node.js 。
+
+### 安装 rust
+
+该应用使用 Rust 进行开发，请参照 [Rust官网](https://www.rust-lang.org/learn/get-started) 进行安装。
+
+### 安装 opencv
