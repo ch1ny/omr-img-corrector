@@ -54,8 +54,7 @@ export default <T>(key: string, options?: IUseLocalStorageOptions<T>) => {
 		};
 
 		window.addEventListener('storage', listener);
-
-		return window.removeEventListener('storage', listener);
+		return () => window.removeEventListener('storage', listener);
 	}, [key, defaultValue, deserializer]);
 
 	return [state, updateState] as [T, React.Dispatch<React.SetStateAction<T>>];
