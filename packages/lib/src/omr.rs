@@ -314,7 +314,7 @@ pub fn correct_default(
                                     .unwrap()
                             }) {
                             Some(projection_candidate) => {
-                                if (projection_candidate - target_angle as f64).abs() < 0.1 {
+                                if (projection_candidate - target_angle as f64).abs() < 0.05 {
                                     (projection_candidate, false)
                                 } else {
                                     (target_angle as f64, true)
