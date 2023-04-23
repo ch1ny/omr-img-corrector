@@ -75,7 +75,7 @@ pub fn correct_default(
     // 找出旋转角度以及是否需要复查
     let (rotate_angle, need_check) = {
         // 先使用基本的投影标准差方法进行纠偏
-        let (projection_angle, projection_result_status) = {
+        let (projection_angle, projection_result_status, projection_candidate_result_vec) = {
             let scaled_mat = {
                 let gray_mat = {
                     let mut dst_mat = Mat::default();
@@ -142,7 +142,7 @@ pub fn correct_default(
                 let mut max_vertical_standard_deviation = 0.0;
                 let mut possible_horizontal_counts = 1u32;
                 let mut possible_vertical_counts = 1u32;
-                let mut most_possible_deg_vec: Vec<i32> = vec![];
+                let mut most_possible_deg_vec: Vec<f64> = vec![];
 
                 for deg in projection_range {
                     // let rotated_image = rotate_mat(
@@ -189,7 +189,7 @@ pub fn correct_default(
                             get_mat_vertical_standard_deviation(&rotated_mat)?;
                         possible_horizontal_counts = 1;
                         possible_vertical_counts = 1;
-                        most_possible_deg_vec = vec![deg];
+                        most_possible_deg_vec = vec![deg as f64 * projection_angle_step];
                     } else if max_horizontal_standard_deviation
                         == horizontal_projection_standard_deviation
                     {
@@ -201,26 +201,35 @@ pub fn correct_default(
                             possible_vertical_counts = 1;
                             max_vertical_standard_deviation =
                                 vertical_projection_standard_deviation;
-                            most_possible_deg_vec = vec![deg];
+                            most_possible_deg_vec = vec![deg as f64 * projection_angle_step];
                         } else if max_vertical_standard_deviation
                             == vertical_projection_standard_deviation
                         {
                             possible_vertical_counts += 1;
-                            most_possible_deg_vec.push(deg);
+                            most_possible_deg_vec.push(deg as f64 * projection_angle_step);
                         }
                     }
                 }
 
                 if possible_horizontal_counts == 1 && possible_vertical_counts == 1 {
-                    let target_angle = most_possible_deg_vec[0] as f64 * projection_angle_step;
-                    (target_angle, ProjectionResultStatus::Believed)
+                    let target_angle = most_possible_deg_vec[0];
+                    (
+                        target_angle,
+                        ProjectionResultStatus::Believed,
+                        most_possible_deg_vec,
+                    )
                 } else if most_possible_deg_vec.len() == 1 {
                     (
-                        most_possible_deg_vec[0] as f64 * projection_angle_step,
+                        most_possible_deg_vec[0],
                         ProjectionResultStatus::NeedCheck,
+                        most_possible_deg_vec,
                     )
                 } else {
-                    (0.0, ProjectionResultStatus::NotAResult)
+                    (
+                        0.0,
+                        ProjectionResultStatus::NotAResult,
+                        most_possible_deg_vec,
+                    )
                 }
             }
         };
@@ -297,7 +306,22 @@ pub fn correct_default(
                                 (projection_angle, false)
                             }
                         }
-                        ProjectionResultStatus::NotAResult => (target_angle as f64, true),
+                        ProjectionResultStatus::NotAResult => match projection_candidate_result_vec
+                            .into_iter()
+                            .min_by(|&a, &b| {
+                                (&(a - target_angle as f64).abs())
+                                    .partial_cmp(&(b - target_angle as f64).abs())
+                                    .unwrap()
+                            }) {
+                            Some(projection_candidate) => {
+                                if (projection_candidate - target_angle as f64).abs() < 0.1 {
+                                    (projection_candidate, false)
+                                } else {
+                                    (target_angle as f64, true)
+                                }
+                            }
+                            None => (target_angle as f64, true),
+                        },
                         _ => unreachable!(),
                     }
                 }
