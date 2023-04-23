@@ -9,6 +9,7 @@ mod file_handlers;
 mod hardware;
 mod task;
 mod test;
+mod thread_pool;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -81,6 +82,7 @@ fn main() {
             test::run_test,
             hardware::system_cpu_info,
             hardware::system_hardware_info,
+            thread_pool::set_max_workers_count
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

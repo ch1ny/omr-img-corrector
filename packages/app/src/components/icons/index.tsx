@@ -110,3 +110,43 @@ const FolderAddSvg = () => (
 	</svg>
 );
 export const FolderAddIcon = wrapIcon(FolderAddSvg);
+
+const CaretRightSvg = () => (
+	<svg viewBox='0 0 1024 1024' width='1em' height='1em'>
+		<path
+			d='M715.8 493.5L335 165.1c-14.2-12.2-35-1.2-35 18.5v656.8c0 19.7 20.8 30.7 35 18.5l380.8-328.4c10.9-9.4 10.9-27.6 0-37z'
+			fill='currentColor'
+		/>
+	</svg>
+);
+export const CaretRightIcon = wrapIcon(CaretRightSvg);
+
+const CheckSvg = () => (
+	<svg viewBox='0 0 1024 1024' width='1em' height='1em' fill='currentColor'>
+		<path d='M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474c-6.1-7.7-15.3-12.2-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1 0.4-12.8-6.3-12.8z' />
+	</svg>
+);
+export const CheckIcon = wrapIcon(CheckSvg);
+
+const CloseSvg = () => (
+	<svg viewBox='0 0 1024 1024' width='1em' height='1em' fill='currentColor'>
+		<path d='M563.8 512l262.5-312.9c4.4-5.2 0.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9c-4.4 5.2-0.7 13.1 6.1 13.1h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z' />
+	</svg>
+);
+export const CloseIcon = wrapIcon(CloseSvg);
+
+const ExclamationSvg = () => (
+	<svg viewBox='0 0 1024 1024' width='1em' height='1em' fill='currentColor'>
+		<path d='M512 804m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z' />
+		<path d='M480 636h64c4.4 0 8-3.6 8-8V164c0-4.4-3.6-8-8-8h-64c-4.4 0-8 3.6-8 8v464c0 4.4 3.6 8 8 8z' />
+	</svg>
+);
+export const ExclamationIcon = wrapIcon(ExclamationSvg);
+
+const DeleteSvg = () => (
+	<svg viewBox='0 0 1024 1024' width='1em' height='1em' fill='currentColor'>
+		<path d='M360 184h-8c4.4 0 8-3.6 8-8v8h304v-8c0 4.4 3.6 8 8 8h-8v72h72v-80c0-35.3-28.7-64-64-64H352c-35.3 0-64 28.7-64 64v80h72v-72z' />
+		<path d='M864 256H160c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h60.4l24.7 523c1.6 34.1 29.8 61 63.9 61h454c34.2 0 62.3-26.8 63.9-61l24.7-523H888c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32zM731.3 840H292.7l-24.2-512h487l-24.2 512z' />
+	</svg>
+);
+export const DeleteIcon = wrapIcon(DeleteSvg);

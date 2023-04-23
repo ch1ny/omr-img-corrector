@@ -26,12 +26,22 @@
 	}
 
 	.panel {
-		width: 7.5rem;
+		width: 10rem;
 		height: 100%;
 		margin-left: auto;
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
+		justify-content: space-evenly;
 		align-items: center;
+	}
+
+	.delete {
+		height: 100%;
+		font-size: 1.25em;
+		transition: 0.3s ease;
+		cursor: pointer;
+
+		&:hover {
+			color: #cc0000;
+		}
 	}
 }

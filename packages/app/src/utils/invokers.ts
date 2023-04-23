@@ -94,7 +94,8 @@ const requestWindowShow = async (windowLabel: string) =>
 	});
 
 const addTask = async (taskProps: ITaskProps) => {
-	const fileName = await tauriPath.basename(taskProps.src);
+	const fileExt = await tauriPath.extname(taskProps.src);
+	const fileName = await tauriPath.basename(taskProps.src, `.${fileExt}`);
 
 	invoke('add_task', {
 		taskId: taskProps.id,
@@ -105,6 +106,12 @@ const addTask = async (taskProps: ITaskProps) => {
 		projectionResizeScale: taskProps.omrConfig.projectionResizeScale,
 		houghMinLineLength: taskProps.omrConfig.houghMinLineLength,
 		houghMaxLineGap: taskProps.omrConfig.houghMaxLineGap,
+	});
+};
+
+const setThreadCounts = async (threadCounts: number) => {
+	invoke('set_max_workers_count', {
+		count: threadCounts,
 	});
 };
 
@@ -120,4 +127,5 @@ export const Invokers = {
 	runTest,
 	exitApp,
 	addTask,
+	setThreadCounts,
 };

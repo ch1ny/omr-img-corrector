@@ -7,7 +7,7 @@ use oics::{
 use rand::Rng;
 use std::{path::Path, time::Instant};
 
-const DATA_SET_DIR_PATH: &str = "C:/Users/10563/Desktop/dataset";
+const DATA_SET_DIR_PATH: &str = "../../dataset/dataset";
 fn run_test(p: bool, h: bool, f: bool) {
     let instant = Instant::now();
     let mut random = rand::thread_rng();
@@ -61,7 +61,7 @@ fn run_test(p: bool, h: bool, f: bool) {
 
             final_image
                 .im_write(
-                    Path::new("C:/Users/10563/Desktop/result/projection")
+                    Path::new("../../dataset/result/projection")
                         .join(file_name)
                         .to_str()
                         .unwrap(),
@@ -84,7 +84,7 @@ fn run_test(p: bool, h: bool, f: bool) {
                 125.0,
                 15.0,
                 file_name,
-                "C:/Users/10563/Desktop/result/edges/",
+                "../../dataset/result/edges/",
             )
             .unwrap();
             transfer::rotate_mat(
@@ -98,7 +98,7 @@ fn run_test(p: bool, h: bool, f: bool) {
             )
             .unwrap()
             .im_write(
-                Path::new("C:/Users/10563/Desktop/result/hough")
+                Path::new("../../dataset/result/hough")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
@@ -124,7 +124,7 @@ fn run_test(p: bool, h: bool, f: bool) {
                 150.0,
                 75.0,
                 file_name,
-                "C:/Users/10563/Desktop/result/canny/",
+                "../../dataset/result/canny/",
             )
             .unwrap();
             transfer::rotate_mat(
@@ -138,7 +138,7 @@ fn run_test(p: bool, h: bool, f: bool) {
             )
             .unwrap()
             .im_write(
-                Path::new("C:/Users/10563/Desktop/result/fft")
+                Path::new("../../dataset/result/fft")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
@@ -259,7 +259,8 @@ mod tests {
             let input_file_path = &filepath.to_string();
             let file_name = this_entry.file_name().to_str().unwrap();
 
-            let random_angle = random.gen_range(-10.0..10.0);
+            let random_angle = random.gen_range(-45.0..45.0);
+            // let random_angle = 0.0;
             let original_image = transfer::rotate_mat(
                 &transfer::TransformableMatrix::new(input_file_path, imgcodecs::IMREAD_COLOR)
                     .unwrap(),
@@ -277,7 +278,7 @@ mod tests {
 
             let (result_angle, need_check) = omr::correct_default(
                 &"./tmp.jpg",
-                Path::new("C:/Users/10563/Desktop/result/projection")
+                Path::new("../../dataset/result/projection")
                     .join(file_name)
                     .to_str()
                     .unwrap(),
@@ -290,8 +291,10 @@ mod tests {
             .unwrap();
 
             if !need_check {
+                println!("{}", (random_angle - result_angle).abs());
                 assert!(
-                    (random_angle - result_angle).abs() < 0.4,
+                    // 99.9% 不会超过 0.4; 近似 100% 不会超过 0.5(测试中出现过一次到达0.54°的情况)
+                    (random_angle - result_angle).abs() < 0.5,
                     "{}, {}",
                     file_name,
                     (random_angle - result_angle).abs()

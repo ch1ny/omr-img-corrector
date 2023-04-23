@@ -229,7 +229,7 @@ struct TestProcessPayload {
 const DATA_SET_DIR_PATH: &str = "./resources/test/dataset";
 
 #[cfg(debug_assertions)]
-const OUTPUT_DIR_PATH: &str = "C:/Users/10563/Desktop/result";
+const OUTPUT_DIR_PATH: &str = "../../../dataset/result";
 #[cfg(not(debug_assertions))]
 const OUTPUT_DIR_PATH: &str = "./resources/test/result";
 

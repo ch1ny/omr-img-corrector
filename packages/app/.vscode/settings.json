@@ -1,3 +1,13 @@
 {
-	"cSpell.words": ["fullscreen", "oics", "sider"]
+	"cSpell.words": [
+		"Deque",
+		"fullscreen",
+		"imgcodecs",
+		"imgproc",
+		"IMREAD",
+		"oics",
+		"preiss",
+		"sider",
+		"walkdir"
+	]
 }

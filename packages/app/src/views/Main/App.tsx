@@ -1,21 +1,45 @@
-import { FileImageIcon, FireIcon, FolderAddIcon, SettingIcon } from '@/components';
+import { CaretRightIcon, FileImageIcon, FireIcon, FolderAddIcon, SettingIcon } from '@/components';
 import useMount from '@/hooks/useMount';
 import { getLibParams, Invokers } from '@/utils';
 import { Button, Divider } from '@mui/material';
 import * as fs from '@tauri-apps/api/fs';
 import * as dialog from '@tauri-apps/api/dialog';
-import { useCallback, useState } from 'react';
+import { createRef, useCallback, useEffect, useState } from 'react';
 import styles from './App.module.less';
 import onAppStart from './onAppStart';
-import Task, { ITaskProps } from './Task';
+import Task, { ITaskProps, ITaskRef } from './Task';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { IUseMultiThreadParams } from '@/types';
+
+/**
+ * 及时更新主进程的多线程配置
+ */
+const useMultiThread = () => {
+	const [multiThreadOptions] = useLocalStorage<IUseMultiThreadParams>('use_multi_thread', {
+		defaultValue: {
+			use: false,
+			threadCounts: 1,
+		},
+	});
+	useEffect(() => {
+		Invokers.setThreadCounts(multiThreadOptions.use ? multiThreadOptions.threadCounts : 1);
+	}, [multiThreadOptions]);
+};
 
 function App() {
 	useMount(onAppStart);
+	useMultiThread();
 
-	const [tasks, setTasks] = useState<Array<ITaskProps>>([]);
+	const [tasks, setTasks] = useState<Array<ITaskProps & { ref: React.RefObject<ITaskRef> }>>([]);
 
 	const addTasks = useCallback((newTasks: ITaskProps[]) => {
-		setTasks((oldTasks) => [...oldTasks, ...newTasks]);
+		setTasks((oldTasks) => [
+			...oldTasks,
+			...newTasks.map((t) => ({
+				...t,
+				ref: createRef<ITaskRef>(),
+			})),
+		]);
 	}, []);
 	const importFileTask = useCallback(async () => {
 		let selected = await dialog.open({
@@ -23,7 +47,7 @@ function App() {
 			filters: [
 				{
 					name: 'Image',
-					extensions: ['png', 'jpeg'],
+					extensions: ['png', 'jpg', 'jpeg'],
 				},
 			],
 		});
@@ -118,6 +142,19 @@ function App() {
 					<div className={styles.headerButton} style={{ marginLeft: 'auto' }}>
 						<Button
 							variant='outlined'
+							startIcon={<CaretRightIcon />}
+							onClick={() =>
+								tasks.forEach(({ ref }) => {
+									ref.current?.runTask();
+								})
+							}
+						>
+							开始
+						</Button>
+					</div>
+					<div className={styles.headerButton}>
+						<Button
+							variant='outlined'
 							startIcon={<SettingIcon />}
 							onClick={() => Invokers.requestWindowShow('settings')}
 						>
@@ -136,8 +173,17 @@ function App() {
 				</div>
 				<Divider />
 				<div className={styles.main}>
-					{tasks.map(({ id, src, omrConfig }) => (
-						<Task id={id} src={src} omrConfig={omrConfig} key={id} />
+					{tasks.map(({ id, src, omrConfig, ref }, idx) => (
+						<Task
+							id={id}
+							src={src}
+							omrConfig={omrConfig}
+							key={id}
+							ref={ref}
+							onDelete={() => {
+								setTasks((oldTasks) => [...oldTasks.slice(0, idx), ...oldTasks.slice(idx + 1)]);
+							}}
+						/>
 					))}
 				</div>
 			</div>
