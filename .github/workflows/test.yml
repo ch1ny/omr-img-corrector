@@ -37,7 +37,7 @@ jobs:
       - name: Test
         run: |
           cd packages/lib
-          cargo test --verbose
+          cargo test -r --verbose
   
   Core_Test:
     runs-on: windows-latest
@@ -64,4 +64,4 @@ jobs:
       - name: Test
         run: |
           cd packages/core
-          cargo test --verbose
+          cargo test -r --verbose
