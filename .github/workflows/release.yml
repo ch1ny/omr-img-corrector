@@ -48,7 +48,7 @@ jobs:
       - name: Build Setup
         id: build-setup
         run: |
-          git submodule update --init --recursive
+          git submodule update --init --remote --recursive
           cd packages/app
           pnpm run tauri build
           cd setup
