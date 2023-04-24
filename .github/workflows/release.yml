@@ -12,7 +12,6 @@ env:
 
 jobs:
   App_Release:
-    if: github.event.pull_request.merged == true
     runs-on: windows-latest
     # define the rust toolchain version to use
     strategy:
