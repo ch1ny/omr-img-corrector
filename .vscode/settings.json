@@ -1,6 +1,7 @@
 {
 	"cSpell.words": [
 		"calib3d",
+		"choco",
 		"core",
 		"dnn",
 		"features2d",
@@ -11,11 +12,14 @@
 		"imgproc",
 		"imread",
 		"imshow",
+		"ISCC",
 		"ml",
 		"objdetect",
 		"oics",
 		"opencv",
 		"photo",
+		"preiss",
+		"softprops",
 		"stitching",
 		"video",
 		"videoio"
