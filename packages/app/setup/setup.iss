@@ -2,7 +2,6 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "omr-corrector"
-#define MyAppVersion "1.0.0"
 #define MyAppPublisher "HanshinKira"
 #define MyAppURL "https://kira.host/"
 #define MyAppExeName "omr-corrector.exe"
