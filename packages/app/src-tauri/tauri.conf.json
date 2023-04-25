@@ -41,7 +41,15 @@
 			},
 			"shell": {
 				"all": false,
-				"open": true
+				"execute": true,
+				"open": true,
+				"scope": [
+					{
+						"name": "windows-explorer",
+						"cmd": "explorer",
+						"args": [{ "validator": ".*" }]
+					}
+				]
 			},
 			"window": {
 				"all": true

@@ -1,19 +1,14 @@
-pub use opencv::{core, highgui, imgcodecs, imgproc, prelude};
+pub use opencv::{
+    core, highgui, imgcodecs, imgproc, prelude, types as opencv_types, Result as OpenCV_Result,
+};
 
 pub mod calculate;
-
 pub mod constants;
-
 pub mod fft;
-
 pub mod hough;
-
 pub mod omr;
-
 pub mod projection;
-
 pub mod transfer;
-
 pub mod types;
 
 #[cfg(test)]
