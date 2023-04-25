@@ -11,6 +11,7 @@ struct StartRunningTaskEventPayload {
 #[derive(Serialize, Clone)]
 struct TaskCompletedEventPayload {
     task_id: usize,
+    output_path: String,
     result: String,
 }
 
@@ -50,10 +51,12 @@ pub fn add_task(
                 } else {
                     "finished"
                 }),
+                output_path: output_file,
             },
             Err(_) => TaskCompletedEventPayload {
                 task_id,
                 result: String::from("error"),
+                output_path: output_file,
             },
         };
         window

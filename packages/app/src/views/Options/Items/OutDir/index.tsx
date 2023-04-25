@@ -3,7 +3,8 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import useMount from '@/hooks/useMount';
 import { Paths } from '@/utils';
 import { Button, Input } from '@mui/material';
-import { dialog } from '@tauri-apps/api';
+import * as dialog from '@tauri-apps/api/dialog';
+import * as shell from '@tauri-apps/api/shell';
 import { useCallback } from 'react';
 import styles from './index.module.less';
 
@@ -29,6 +30,10 @@ const OutDir = () => {
 		setOutputDir(selected as string);
 	}, []);
 
+	const openOutputDir = useCallback(() => {
+		new shell.Command('windows-explorer', [outputDir]).spawn();
+	}, [outputDir]);
+
 	return (
 		<div className={styles.outDir}>
 			<div className={styles.outDirPath}>
@@ -38,8 +43,13 @@ const OutDir = () => {
 					value={outputDir}
 					fullWidth
 				/>
+			</div>
+			<div className={styles.outDirButtons}>
 				<Button variant={'contained'} size={'small'} onClick={handleSelectOutputDir}>
-					更改
+					更改输出文件夹
+				</Button>
+				<Button variant={'outlined'} size={'small'} onClick={openOutputDir}>
+					打开输出文件夹
 				</Button>
 			</div>
 		</div>
