@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import * as event from '@tauri-apps/api/event';
 import styles from './index.module.less';
-import { Button, Chip, CircularProgress, Divider, LinearProgress } from '@mui/material';
+import { Chip, CircularProgress, Divider, LinearProgress } from '@mui/material';
 import { Invokers } from '@/utils';
 import { CaretRightIcon, CheckIcon, CloseIcon, DeleteIcon, ExclamationIcon } from '@/components';
+import openModifyWindow from '../openModifyWindow';
 
 export interface ITaskProps {
 	id: number;
@@ -30,10 +31,15 @@ interface ITaskComponentProps extends ITaskProps {
 }
 
 export default forwardRef<ITaskRef, ITaskComponentProps>((props, ref) => {
-	const { id, src, omrConfig, onDelete } = props;
+	const { id, src, onDelete } = props;
 	const previewSrc = useMemo(() => convertFileSrc(src), [src]);
 
 	const [status, setStatus] = useState<TTaskStatus>('ready');
+
+	const [outputPath, setOutputPath] = useState('');
+	const onDebate = useCallback(() => {
+		openModifyWindow(id, outputPath);
+	}, [id, outputPath]);
 
 	useEffect(() => {
 		const unListenOnTaskRunning = event.listen('start_running_task', (ev) => {
@@ -51,14 +57,15 @@ export default forwardRef<ITaskRef, ITaskComponentProps>((props, ref) => {
 		const unListenOnTaskCompleted = event.listen('task_completed', (ev) => {
 			// console.log(ev);
 			if (ev.windowLabel !== 'main') return;
-			const { task_id, result } = ev.payload as {
+			const { task_id, result, output_path } = ev.payload as {
 				task_id: number;
 				result: 'finished' | 'debatable' | 'error';
+				output_path: string;
 			};
 			if (task_id !== id) return;
 			setStatus((currentStatus) => {
 				if (currentStatus !== 'running') return currentStatus;
-
+				setOutputPath(output_path);
 				return result;
 			});
 		});
@@ -70,18 +77,14 @@ export default forwardRef<ITaskRef, ITaskComponentProps>((props, ref) => {
 		};
 	}, [id]);
 
-	const runTask = useMemo(() => {
-		if (status !== 'ready') {
-			return () => {
-				// TODO:
-			};
-		} else {
-			return () => {
-				setStatus('waiting');
-				Invokers.addTask(props);
-			};
-		}
-	}, [status, props]);
+	const runTask = useCallback(() => {
+		setStatus((oldStatus) => {
+			if (oldStatus !== 'ready') return oldStatus;
+
+			Invokers.addTask(props);
+			return 'waiting';
+		});
+	}, [props]);
 	useImperativeHandle(
 		ref,
 		() => ({
@@ -187,13 +190,15 @@ export default forwardRef<ITaskRef, ITaskComponentProps>((props, ref) => {
 					</div>
 				</div>
 				<div className={styles.panel}>
-					<div>
+					<div
+						style={{ cursor: status === 'ready' || status === 'debatable' ? 'pointer' : 'auto' }}
+					>
 						<Chip
 							label={chipLabel}
 							color={progressColor}
 							clickable={status === 'ready' || status === 'debatable'}
 							icon={chipIcon}
-							onClick={runTask}
+							onClick={status === 'debatable' ? onDebate : runTask}
 						/>
 					</div>
 					<div>

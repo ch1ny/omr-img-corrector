@@ -59,6 +59,7 @@ export default defineConfig((env) => ({
 		rollupOptions: {
 			input: {
 				main: path.resolve(__dirname, 'views', 'main.html'),
+				modify: path.resolve(__dirname, 'views', 'modify.html'),
 				options: path.resolve(__dirname, 'views', 'options.html'),
 				splash: path.resolve(__dirname, 'views', 'splash.html'),
 				test: path.resolve(__dirname, 'views', 'test.html'),
