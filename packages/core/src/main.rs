@@ -1,13 +1,18 @@
+use noise::add_gaussian_noise;
 use oics::{
     self,
     core::{self, Scalar},
-    imgcodecs, imgproc, transfer,
+    imgcodecs, imgproc,
+    transfer::{self, TransformableMatrix},
     types::{ImageFormat, RotateClipStrategy},
 };
 use rand::Rng;
 use std::{path::Path, time::Instant};
 
+mod noise;
+
 const DATA_SET_DIR_PATH: &str = "../../dataset/dataset";
+#[allow(dead_code)]
 fn run_test(p: bool, h: bool, f: bool) {
     let instant = Instant::now();
     let mut random = rand::thread_rng();
@@ -42,6 +47,20 @@ fn run_test(p: bool, h: bool, f: bool) {
             RotateClipStrategy::DEFAULT,
         )
         .unwrap();
+
+        // 添加高斯噪声
+        let original_image = transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+        let original_image = TransformableMatrix::from_matrix(&{
+            let mut dst = oics::prelude::Mat::default();
+            imgproc::cvt_color(
+                &add_gaussian_noise(original_image.get_mat(), 0.0, 20.0),
+                &mut dst,
+                imgproc::COLOR_GRAY2RGB,
+                0,
+            )
+            .unwrap();
+            dst
+        });
 
         if p {
             let projection_start = instant.elapsed().as_millis();
@@ -228,7 +247,7 @@ fn run_test(p: bool, h: bool, f: bool) {
 }
 
 fn main() {
-    run_test(false, false, true);
+    run_test(true, true, false);
 }
 
 // 测试
@@ -237,13 +256,18 @@ mod tests {
     use oics::{
         self,
         core::{self, Scalar},
-        imgcodecs, imgproc, omr, transfer,
+        imgcodecs, imgproc, omr,
+        transfer::{self, TransformableMatrix},
         types::{ImageFormat, RotateClipStrategy},
     };
     use rand::Rng;
     use std::path::Path;
 
-    use crate::DATA_SET_DIR_PATH;
+    #[allow(unused_imports)]
+    use crate::{
+        noise::{add_gaussian_noise, add_salt_and_pepper_noise},
+        DATA_SET_DIR_PATH,
+    };
 
     #[test]
     fn lib_omr() {
@@ -272,6 +296,24 @@ mod tests {
                 RotateClipStrategy::DEFAULT,
             )
             .unwrap();
+
+            let original_image =
+                transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+            let original_image = TransformableMatrix::from_matrix(&{
+                let mut dst = oics::prelude::Mat::default();
+                imgproc::cvt_color(
+                    // 添加高斯噪声
+                    &add_gaussian_noise(original_image.get_mat(), 0.0, 255.0),
+                    // 添加椒盐噪声
+                    // &add_salt_and_pepper_noise(original_image.get_mat(), 0.01),
+                    &mut dst,
+                    imgproc::COLOR_GRAY2RGB,
+                    0,
+                )
+                .unwrap();
+                dst
+            });
+
             original_image
                 .im_write("./tmp.jpg", ImageFormat::JPEG, 100)
                 .unwrap();
