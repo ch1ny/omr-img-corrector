@@ -370,11 +370,11 @@ pub fn transfer_thresh_binary_to_vertical_projection(
         for row_index in 0..height {
             // 获取指定位置的色块数值
             let target = mat.at_row_mut::<u8>(row_index)?[col_index as usize];
-            if target == 0 {
+            if target <= 127 {
                 sum += 1;
-                // 将对应色块覆盖为白色
-                mat.at_row_mut::<u8>(row_index)?[col_index as usize] = 255;
             }
+            // 将对应色块覆盖为白色
+            mat.at_row_mut::<u8>(row_index)?[col_index as usize] = 255;
         }
 
         // 寻找对应黑点数的所有列并插入
