@@ -49,11 +49,37 @@ pub fn correct_default(
     output_file: &str,
     projection_max_angle: u16,
     projection_angle_step: f64,
-    projection_resize_scale: f64,
+    projection_max_width: i32,
+    projection_max_height: i32,
     hough_min_line_length: f64,
     hough_max_line_gap: f64,
 ) -> opencv::Result<(f64, bool)> {
     let src_mat = imgcodecs::imread(input_file, imgcodecs::IMREAD_COLOR)?;
+
+    // 计算缩放比例
+    let projection_resize_scale = {
+        let original_size = &src_mat.size()?;
+        let original_width = original_size.width;
+        let original_height = original_size.height;
+        let width_scale = if projection_max_width <= 0 {
+            1.0
+        } else {
+            projection_max_width as f64 / original_width as f64
+        };
+        let height_scale = if projection_max_height <= 0 {
+            1.0
+        } else {
+            projection_max_height as f64 / original_height as f64
+        };
+
+        let target_scale = if width_scale < height_scale {
+            width_scale
+        } else {
+            height_scale
+        };
+
+        target_scale
+    };
 
     // 找出旋转角度以及是否需要复查
     let (rotate_angle, need_check) = {
@@ -95,13 +121,9 @@ pub fn correct_default(
                         ((size.width as f64) * projection_resize_scale) as i32,
                         ((size.height as f64) * projection_resize_scale) as i32,
                     ),
-                    projection_resize_scale,
-                    projection_resize_scale,
-                    if projection_resize_scale > 1.0 {
-                        imgproc::INTER_LINEAR
-                    } else {
-                        imgproc::INTER_AREA
-                    },
+                    0.0,
+                    0.0,
+                    imgproc::INTER_AREA,
                 )?;
                 scaled
             };

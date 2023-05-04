@@ -30,7 +30,8 @@ export const getLibParams = () => {
 	const projectionParams = getValueFromLocalStorageByKey<IProjectionParams>('projection_params', {
 		maxAngle: 45,
 		angleStep: 0.2,
-		imageResizeScale: 0.2,
+		maxWidth: 248,
+		maxHeight: 230,
 	});
 	const houghParams = getValueFromLocalStorageByKey<IHoughParams>('hough_params', {
 		minLineLength: 125.0,
@@ -48,7 +49,8 @@ export const getLibParams = () => {
 		usedThreads: useMultiThread?.use ? useMultiThread?.threadCounts ?? 0 : 1,
 		projectionMaxAngle: projectionParams.maxAngle || 45,
 		projectionAngleStep: projectionParams.angleStep || 0.2,
-		projectionResizeScale: projectionParams.imageResizeScale || 0.2,
+		projectionMaxWidth: projectionParams.maxWidth || 248,
+		projectionMaxHeight: projectionParams.maxHeight || 230,
 		houghMinLineLength: houghParams.minLineLength || 125.0,
 		houghMaxLineGap: houghParams.maxLineGap || 5.0,
 		fftCannyThresholdLower: fftParams.cannyThresholdLower || 125.0,

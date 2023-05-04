@@ -33,7 +33,8 @@ export interface IUseMultiThreadParams {
 export interface IProjectionParams {
 	maxAngle: number;
 	angleStep: number;
-	imageResizeScale: number;
+	maxWidth: number;
+	maxHeight: number;
 }
 
 export interface IHoughParams {
