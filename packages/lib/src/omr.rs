@@ -5,54 +5,37 @@ use opencv::{
     types::{VectorOfVec4f, VectorOfi32},
 };
 
-fn get_mat_horizontal_standard_deviation(mat: &Mat) -> opencv::Result<f64> {
-    let mut result: Vec<f64> = Vec::with_capacity(mat.rows() as usize);
+fn get_mat_projection_data(mat: &Mat) -> opencv::Result<(Vec<f64>, Vec<f64>)> {
+    // 定义数组分别记录水平方向、垂直方向上的投影数据
+    let mut horizontal_projection_data: Vec<f64> = Vec::with_capacity(mat.rows() as usize);
+    let mut vertical_projection_data: Vec<f64> = vec![0.0f64; mat.cols() as usize];
+
     // 遍历每一行
     for row_index in 0..mat.rows() {
         // 获取当前行的数据数组
         let row = mat.at_row::<u8>(row_index)?;
 
         // 当前行黑色的色块总数
-        let mut sum = 0;
-
-        // 遍历当前行的每一个色块
-        for item in row {
-            // 如果为黑色色块
-            // 总数加一
-            // 如果为白色色块
-            // 不做处理
-            if *item == 0 {
-                sum += 1;
-            }
-        }
-
-        result.push(sum as f64);
-    }
-    Ok(crate::calculate::get_standard_deviation(&result))
-}
-
-fn get_mat_vertical_standard_deviation(mat: &Mat) -> opencv::Result<f64> {
-    let mut result = vec![0.0; mat.cols() as usize];
-
-    // 遍历每一行
-    for row_index in 0..mat.rows() {
-        // 获取当前行的数据数组
-        let row = mat.at_row::<u8>(row_index)?;
-
+        let mut row_black_sum = 0;
+        // 记录迭代序列
         let mut col_index = 0;
-        // 遍历当前行的每一个色块
+
+        // 遍历当前行的每一个色块，通过迭代器提高遍历速度
         row.iter().for_each(|item| {
             // 如果为白色色块
             // 不做处理
             // 如果为黑色色块
             // 总数加一
             if *item == 0 {
-                result[col_index] += 1.0;
+                row_black_sum += 1;
+                vertical_projection_data[col_index] += 1.0;
             }
             col_index += 1;
         });
+        horizontal_projection_data.push(row_black_sum as f64);
     }
-    Ok(crate::calculate::get_standard_deviation(&result))
+
+    Ok((horizontal_projection_data, vertical_projection_data))
 }
 
 enum ProjectionResultStatus {
@@ -66,11 +49,37 @@ pub fn correct_default(
     output_file: &str,
     projection_max_angle: u16,
     projection_angle_step: f64,
-    projection_resize_scale: f64,
+    projection_max_width: i32,
+    projection_max_height: i32,
     hough_min_line_length: f64,
     hough_max_line_gap: f64,
 ) -> opencv::Result<(f64, bool)> {
     let src_mat = imgcodecs::imread(input_file, imgcodecs::IMREAD_COLOR)?;
+
+    // 计算缩放比例
+    let projection_resize_scale = {
+        let original_size = &src_mat.size()?;
+        let original_width = original_size.width;
+        let original_height = original_size.height;
+        let width_scale = if projection_max_width <= 0 {
+            1.0
+        } else {
+            projection_max_width as f64 / original_width as f64
+        };
+        let height_scale = if projection_max_height <= 0 {
+            1.0
+        } else {
+            projection_max_height as f64 / original_height as f64
+        };
+
+        let target_scale = if width_scale < height_scale {
+            width_scale
+        } else {
+            height_scale
+        };
+
+        target_scale
+    };
 
     // 找出旋转角度以及是否需要复查
     let (rotate_angle, need_check) = {
@@ -84,12 +93,15 @@ pub fn correct_default(
                 };
 
                 // 先对输入图像进行腐蚀预处理以提升图像锐度
+                // 声明腐蚀操作输出图像可变
                 let mut eroded = Mat::default();
+                // 定义腐蚀核，为一个内嵌至长宽3像素的矩形的填充椭圆
                 let kernel = imgproc::get_structuring_element(
                     imgproc::MORPH_ELLIPSE,
                     opencv::core::Size::new(3, 3),
                     opencv::core::Point::new(-1, -1),
                 )?;
+                // 通过调用opencv的腐蚀操作对图像进行处理，将输出结果写入eroded的可变引用中
                 imgproc::erode(
                     &gray_mat,
                     &mut eroded,
@@ -109,13 +121,9 @@ pub fn correct_default(
                         ((size.width as f64) * projection_resize_scale) as i32,
                         ((size.height as f64) * projection_resize_scale) as i32,
                     ),
-                    projection_resize_scale,
-                    projection_resize_scale,
-                    if projection_resize_scale > 1.0 {
-                        imgproc::INTER_LINEAR
-                    } else {
-                        imgproc::INTER_AREA
-                    },
+                    0.0,
+                    0.0,
+                    imgproc::INTER_AREA,
                 )?;
                 scaled
             };
@@ -177,16 +185,20 @@ pub fn correct_default(
                         dst
                     };
 
+                    // 获取水平、垂直投影数据
+                    let (horizontal_projection_data, vertical_projection_data) =
+                        get_mat_projection_data(&rotated_mat)?;
+
                     // 先获取水平投影标准差
                     let horizontal_projection_standard_deviation =
-                        get_mat_horizontal_standard_deviation(&rotated_mat)?;
+                        crate::calculate::get_standard_deviation(&horizontal_projection_data);
                     if max_horizontal_standard_deviation < horizontal_projection_standard_deviation
                     {
                         max_horizontal_standard_deviation =
                             horizontal_projection_standard_deviation;
                         // 再获取垂直投影标准差
                         max_vertical_standard_deviation =
-                            get_mat_vertical_standard_deviation(&rotated_mat)?;
+                            crate::calculate::get_standard_deviation(&vertical_projection_data);
                         possible_horizontal_counts = 1;
                         possible_vertical_counts = 1;
                         most_possible_deg_vec = vec![deg as f64 * projection_angle_step];
@@ -194,8 +206,9 @@ pub fn correct_default(
                         == horizontal_projection_standard_deviation
                     {
                         possible_horizontal_counts += 1;
+                        // 再获取垂直投影标准差
                         let vertical_projection_standard_deviation =
-                            get_mat_vertical_standard_deviation(&rotated_mat)?;
+                            crate::calculate::get_standard_deviation(&vertical_projection_data);
                         if max_vertical_standard_deviation < vertical_projection_standard_deviation
                         {
                             possible_vertical_counts = 1;

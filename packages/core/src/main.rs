@@ -1,4 +1,6 @@
+#[allow(unused_imports)]
 use noise::add_gaussian_noise;
+#[allow(unused_imports)]
 use oics::{
     self,
     core::{self, Scalar},
@@ -44,23 +46,23 @@ fn run_test(p: bool, h: bool, f: bool) {
             imgproc::INTER_LINEAR,
             core::BORDER_CONSTANT,
             Scalar::new(255.0, 255.0, 255.0, 0.0),
-            RotateClipStrategy::DEFAULT,
+            RotateClipStrategy::CONTAIN,
         )
         .unwrap();
 
         // 添加高斯噪声
-        let original_image = transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
-        let original_image = TransformableMatrix::from_matrix(&{
-            let mut dst = oics::prelude::Mat::default();
-            imgproc::cvt_color(
-                &add_gaussian_noise(original_image.get_mat(), 0.0, 20.0),
-                &mut dst,
-                imgproc::COLOR_GRAY2RGB,
-                0,
-            )
-            .unwrap();
-            dst
-        });
+        // let original_image = transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
+        // let original_image = TransformableMatrix::from_matrix(&{
+        //     let mut dst = oics::prelude::Mat::default();
+        //     imgproc::cvt_color(
+        //         &add_gaussian_noise(original_image.get_mat(), 0.0, 20.0),
+        //         &mut dst,
+        //         imgproc::COLOR_GRAY2RGB,
+        //         0,
+        //     )
+        //     .unwrap();
+        //     dst
+        // });
 
         if p {
             let projection_start = instant.elapsed().as_millis();
@@ -303,9 +305,10 @@ mod tests {
                 let mut dst = oics::prelude::Mat::default();
                 imgproc::cvt_color(
                     // 添加高斯噪声
-                    &add_gaussian_noise(original_image.get_mat(), 0.0, 255.0),
+                    // &add_gaussian_noise(original_image.get_mat(), 0.0, 255.0),
                     // 添加椒盐噪声
                     // &add_salt_and_pepper_noise(original_image.get_mat(), 0.01),
+                    &original_image.get_mat(),
                     &mut dst,
                     imgproc::COLOR_GRAY2RGB,
                     0,
@@ -326,14 +329,15 @@ mod tests {
                     .unwrap(),
                 45,
                 0.2,
-                0.2,
+                248,
+                230
                 150.0,
                 50.0,
             )
             .unwrap();
 
             if !need_check {
-                println!("{}", (random_angle - result_angle).abs());
+                // println!("{}", (random_angle - result_angle).abs());
                 assert!(
                     // 99.9% 不会超过 0.4; 近似 100% 不会超过 0.5(测试中出现过一次到达0.54°的情况)
                     (random_angle - result_angle).abs() < 0.5,

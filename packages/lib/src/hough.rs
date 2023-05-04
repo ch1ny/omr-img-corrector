@@ -64,11 +64,7 @@ pub fn get_angle_with_hough(
 
         let mut angle = (pt2.y - pt1.y).atan2(pt2.x - pt1.x) * 180.0 / std::f32::consts::PI;
         // 限制偏转角度在 -45deg ~ +45deg 之间
-        if angle < -45.0 {
-            angle = angle + 90.0;
-        } else if angle > 45.0 {
-            angle = angle - 90.0;
-        }
+        angle = angle % 45.0;
         angles.push(angle);
     }
 

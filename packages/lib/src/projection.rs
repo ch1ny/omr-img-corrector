@@ -23,7 +23,7 @@ pub fn get_angle_with_projections(
 ) -> f64 {
     let scaled_img = {
         let mut cloned_img = src_img.clone();
-        cloned_img.resize_self(resize_scale).unwrap().to_owned()
+        cloned_img.scale_self(resize_scale).unwrap().to_owned()
     };
     // 二值化图像
     let thresh_image = {

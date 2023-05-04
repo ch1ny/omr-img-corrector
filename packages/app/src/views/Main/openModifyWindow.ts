@@ -5,7 +5,7 @@ export default async function (taskId: number, src: string) {
 		title: `人工审查 - ${src}`,
 		url: `views/modify.html?src=${encodeURIComponent(src)}`,
 		width: 600,
-		height: 650,
+		height: 750,
 		center: true,
 		resizable: false,
 	});
