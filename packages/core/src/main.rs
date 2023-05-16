@@ -274,6 +274,10 @@ mod tests {
     #[test]
     fn lib_omr() {
         let mut random = rand::thread_rng();
+        let mut total_times: u32 = 0;
+        let mut total_mistake = 0.0f64;
+        let mut total_time_cost: u128 = 0;
+        let instant = std::time::Instant::now();
 
         for entry in walkdir::WalkDir::new(DATA_SET_DIR_PATH) {
             let this_entry = entry.unwrap();
@@ -321,6 +325,8 @@ mod tests {
                 .im_write("./tmp.jpg", ImageFormat::JPEG, 100)
                 .unwrap();
 
+            let algorithm_start = instant.elapsed().as_millis();
+
             let (result_angle, need_check) = omr::correct_default(
                 &"./tmp.jpg",
                 Path::new("../../dataset/result/projection")
@@ -336,18 +342,32 @@ mod tests {
             )
             .unwrap();
 
+            let algorithm_end = instant.elapsed().as_millis();
+
             if !need_check {
-                // println!("{}", (random_angle - result_angle).abs());
+                if (random_angle - result_angle).abs() >= 0.4 {
+                    println!("{}", (random_angle - result_angle).abs());
+                }
                 assert!(
-                    // 99.9% 不会超过 0.4; 近似 100% 不会超过 0.5(测试中出现过一次到达0.54°的情况)
+                    // 99.9% 不会超过 0.4; 近似 100% 不会超过 0.5(测试中出现过一次超过0.5°的情况)
                     (random_angle - result_angle).abs() < 0.5,
                     "{}, {}",
                     file_name,
                     (random_angle - result_angle).abs()
                 );
+
+                total_times += 1;
+                total_mistake += (random_angle - result_angle).abs();
+                total_time_cost += algorithm_end - algorithm_start;
             } else {
-                println!("{}", file_name);
+                println!("{} => {}", file_name, (random_angle - result_angle).abs());
             }
         }
+
+        println!("Average Error = {}deg", total_mistake / total_times as f64);
+        println!(
+            "Average Run Time = {}ms",
+            total_time_cost / total_times as u128
+        );
     }
 }
