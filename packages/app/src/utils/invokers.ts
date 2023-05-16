@@ -103,7 +103,8 @@ const addTask = async (taskProps: ITaskProps) => {
 		outputFile: path.resolveSync(taskProps.omrConfig.outputDir, `${fileName}.jpg`),
 		projectionMaxAngle: taskProps.omrConfig.projectionMaxAngle,
 		projectionAngleStep: taskProps.omrConfig.projectionAngleStep,
-		projectionResizeScale: taskProps.omrConfig.projectionResizeScale,
+		projectionMaxWidth: taskProps.omrConfig.projectionMaxWidth,
+		projectionMaxHeight: taskProps.omrConfig.projectionMaxHeight,
 		houghMinLineLength: taskProps.omrConfig.houghMinLineLength,
 		houghMaxLineGap: taskProps.omrConfig.houghMaxLineGap,
 	});

@@ -149,7 +149,8 @@ function App() {
 				projection: {
 					maxAngle: libParams.projectionMaxAngle,
 					angleStep: libParams.projectionAngleStep,
-					imageResizeScale: libParams.projectionResizeScale,
+					maxWidth: libParams.projectionMaxWidth,
+					maxHeight: libParams.projectionMaxHeight,
 				},
 				hough: {
 					minLineLength: libParams.houghMinLineLength,

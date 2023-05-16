@@ -16,9 +16,11 @@ fn before_execute() {
         let max_workers_count = MAX_WORKERS_COUNT.lock().unwrap();
         let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
         if *running_workers_count >= *max_workers_count {
+            // 如果当前正在执行的任务数不小于最大任务数，不做任何处理
             return;
         }
         let mut waiting_workers_queue = WAITING_WORKERS_QUEUE.lock().unwrap();
+        // 从等待队列中取出第一个任务
         let next_worker = waiting_workers_queue.pop_front();
         drop(max_workers_count);
         drop(waiting_workers_queue);
@@ -27,6 +29,7 @@ fn before_execute() {
                 return;
             }
             Some(bx) => {
+                // 如果存在待执行的任务则立即执行
                 *running_workers_count += 1;
                 drop(running_workers_count);
                 execute(bx);
@@ -41,6 +44,7 @@ where
 {
     thread::spawn(move || {
         f();
+        // 任务执行完毕后使执行中任务计数减一
         let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
         *running_workers_count -= 1;
         drop(running_workers_count);
@@ -56,11 +60,13 @@ where
     let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
     let max_workers_count = MAX_WORKERS_COUNT.lock().unwrap();
     if *running_workers_count < *max_workers_count {
+        // 若当前执行中任务小于最大执行任务则立即执行
         *running_workers_count += 1;
         drop(running_workers_count);
         drop(max_workers_count);
         execute(f);
     } else {
+        // 否则将任务添加到等待队列尾部
         let mut waiting_workers_queue = WAITING_WORKERS_QUEUE.lock().unwrap();
         waiting_workers_queue.push_back(Box::new(f));
     }

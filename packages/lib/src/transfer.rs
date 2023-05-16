@@ -63,7 +63,7 @@ impl TransformableMatrix {
         Ok(Self { matrix })
     }
 
-    pub fn resize_self(self: &mut Self, scale: f64) -> Result<&mut Self, opencv::Error> {
+    pub fn scale_self(self: &mut Self, scale: f64) -> Result<&mut Self, opencv::Error> {
         if scale == 1.0 {
             return Ok(self);
         }
@@ -84,6 +84,60 @@ impl TransformableMatrix {
             } else {
                 imgproc::INTER_AREA
             },
+        )?;
+        self.matrix = dst;
+
+        Ok(self)
+    }
+
+    pub fn shrink_to(
+        self: &mut Self,
+        max_width: i32,
+        max_height: i32,
+    ) -> Result<&mut Self, opencv::Error> {
+        let matrix = &self.matrix;
+
+        let original_size = matrix.size()?;
+        let original_width = original_size.width;
+        let original_height = original_size.height;
+
+        let width_scale = if max_width <= 0 {
+            1.0
+        } else {
+            max_width as f64 / original_width as f64
+        };
+        let height_scale = if max_height <= 0 {
+            1.0
+        } else {
+            max_height as f64 / original_height as f64
+        };
+
+        let target_scale = if width_scale < height_scale {
+            width_scale
+        } else {
+            height_scale
+        };
+
+        if target_scale >= 1.0 {
+            Ok(self)
+        } else {
+            Ok(self.scale_self(target_scale)?)
+        }
+    }
+
+    pub fn resize_self(
+        self: &mut Self,
+        width: i32,
+        height: i32,
+    ) -> Result<&mut Self, opencv::Error> {
+        let mut dst = Mat::default();
+        imgproc::resize(
+            &self.matrix,
+            &mut dst,
+            Size2i::new(width, height),
+            0.0,
+            0.0,
+            imgproc::INTER_AREA,
         )?;
         self.matrix = dst;
 
@@ -370,11 +424,11 @@ pub fn transfer_thresh_binary_to_vertical_projection(
         for row_index in 0..height {
             // 获取指定位置的色块数值
             let target = mat.at_row_mut::<u8>(row_index)?[col_index as usize];
-            if target == 0 {
+            if target <= 127 {
                 sum += 1;
-                // 将对应色块覆盖为白色
-                mat.at_row_mut::<u8>(row_index)?[col_index as usize] = 255;
             }
+            // 将对应色块覆盖为白色
+            mat.at_row_mut::<u8>(row_index)?[col_index as usize] = 255;
         }
 
         // 寻找对应黑点数的所有列并插入

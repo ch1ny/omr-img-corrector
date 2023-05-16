@@ -14,7 +14,8 @@ export interface ITaskProps {
 		outputDir: string;
 		projectionMaxAngle: number;
 		projectionAngleStep: number;
-		projectionResizeScale: number;
+		projectionMaxWidth: number;
+		projectionMaxHeight: number;
 		houghMinLineLength: number;
 		houghMaxLineGap: number;
 	};

@@ -238,7 +238,8 @@ pub fn run_test(
     test_id: usize,
     projection_max_angle: u16,
     projection_angle_step: f64,
-    projection_resize_scale: f64,
+    projection_max_width: i32,
+    projection_max_height: i32,
     hough_min_line_length: f64,
     hough_max_line_gap: f64,
     fft_canny_threshold_lower: f64,
@@ -308,7 +309,9 @@ pub fn run_test(
             let thresh_image = {
                 let mut gray_image =
                     transfer::transfer_rgb_image_to_gray_image(&original_image).unwrap();
-                let gray_image = gray_image.resize_self(projection_resize_scale).unwrap();
+                let gray_image = gray_image
+                    .shrink_to(projection_max_width, projection_max_height)
+                    .unwrap();
 
                 transfer::transfer_gray_image_to_thresh_binary(&gray_image).unwrap()
             };

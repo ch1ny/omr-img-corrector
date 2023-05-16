@@ -20,7 +20,8 @@ const ProjectionParams = () => {
 			defaultValue: {
 				maxAngle: 45,
 				angleStep: 0.2,
-				imageResizeScale: 0.2,
+				maxWidth: 248,
+				maxHeight: 230,
 			},
 		}
 	);
@@ -68,22 +69,42 @@ const ProjectionParams = () => {
 					</div>
 					<Divider />
 					<div className={styles.param}>
-						<Typography variant='body2'>
-							图像缩放比: 【 {projectionParams.imageResizeScale} 】
-						</Typography>
+						<Typography variant='body2'>图像最大尺寸：</Typography>
 						<Typography variant='caption' sx={{ color: '#8d8d8d' }}>
-							更高的缩放比会带来更高的精确度，也会带来更长的运行时间
+							图像尺寸越大会带来更高的精确度，也会带来更长的运行时间
 						</Typography>
-						<Slider
-							value={projectionParams.imageResizeScale}
+						<br />
+						<Typography variant='caption' sx={{ color: '#8d8d8d' }}>
+							输入为0时表示不对图像尺寸做限制
+						</Typography>
+						<br />
+						<Input
 							size='small'
-							step={0.01}
-							min={0.01}
-							max={1.0}
-							onChange={(_, value) => {
+							value={projectionParams.maxWidth}
+							inputProps={{
+								step: 1,
+								min: 0,
+								type: 'number',
+							}}
+							onChange={(ev) => {
 								setProjectionParams({
 									...projectionParams,
-									imageResizeScale: value as number,
+									maxWidth: Math.max(parseInt(ev.target.value || '0'), 0),
+								});
+							}}
+						/>
+						<Input
+							size='small'
+							value={projectionParams.maxHeight}
+							inputProps={{
+								step: 1,
+								min: 0,
+								type: 'number',
+							}}
+							onChange={(ev) => {
+								setProjectionParams({
+									...projectionParams,
+									maxHeight: Math.max(parseInt(ev.target.value || '0'), 0),
 								});
 							}}
 						/>
