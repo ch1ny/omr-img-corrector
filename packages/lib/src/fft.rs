@@ -121,7 +121,7 @@ fn fft_magnitude_log(fft: &(Mat, Mat)) -> opencv::Result<Mat> {
     Ok(image)
 }
 
-fn get_fft_image(gray_tm: &TransformableMatrix) -> opencv::Result<(Mat, Mat)> {
+pub fn get_fft_image(gray_tm: &TransformableMatrix) -> opencv::Result<(Mat, Mat)> {
     let image_file = {
         let gray_tm_mat = gray_tm.get_mat();
         let mut clone = gray_tm_mat.clone();
