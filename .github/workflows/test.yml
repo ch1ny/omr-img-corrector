@@ -38,3 +38,16 @@ jobs:
         run: |
           cd packages/lib
           cargo test -r -- --nocapture
+      - name: Output Test Logs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: test
+          name: Release Test Logs
+          draft: false
+          prerelease: false
+          files: |
+            packages/lib/test_logs/crate_omr_correct_default_all_situation_test.log
+        env:
+          GITHUB_REPOSITORY: ch1ny/test-workflow
+          
+

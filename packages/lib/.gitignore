@@ -1,2 +1,4 @@
 target
 tmp.jpg
+test_logs/*
+!test_logs/.gitkeep
