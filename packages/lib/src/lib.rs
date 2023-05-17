@@ -234,6 +234,8 @@ mod tests {
                     total_mistake += distance;
                     total_time_cost += algorithm_end - algorithm_start;
                 }
+
+                println!("Test {} {}deg DONE", file_name, original_image_rotate_angle);
             }
         }
 

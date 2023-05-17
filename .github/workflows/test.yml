@@ -44,7 +44,7 @@ jobs:
           tag_name: test
           name: Release Test Logs
           draft: false
-          prerelease: false
+          prerelease: true
           files: |
             packages/lib/test_logs/crate_omr_correct_default_all_situation_test.log
         env:
