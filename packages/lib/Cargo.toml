@@ -9,6 +9,9 @@ edition = "2021"
 opencv = { version = "0.77.0", default-features = false, features = ["highgui", "imgcodecs", "imgproc"] }
 rand = "0.8.5"
 
+[dev-dependencies]
+walkdir = "2.3.3"
+
 [lib]
 name = "oics"
 crate-type = ["rlib"]

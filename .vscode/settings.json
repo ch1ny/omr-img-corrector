@@ -14,6 +14,7 @@
 		"imshow",
 		"ISCC",
 		"ml",
+		"nocapture",
 		"objdetect",
 		"oics",
 		"opencv",

@@ -37,31 +37,4 @@ jobs:
       - name: Test
         run: |
           cd packages/lib
-          cargo test -r --verbose
-  
-  Core_Test:
-    runs-on: windows-latest
-    # define the rust toolchain version to use
-    strategy:
-      matrix:
-        rust: [ stable ]
-    env:
-      OPENCV_INCLUDE_PATHS: C:/tools/opencv/build/include
-      OPENCV_LINK_LIBS: opencv_world460
-      OPENCV_LINK_PATHS: C:/tools/opencv/build/x64/vc15/lib
-    steps:
-      - uses: actions/checkout@v3
-      # 这一个操作会自动处理 Restore 和 Save
-      - id: cache-opencv-460
-        uses: actions/cache@v3
-        with:
-          path: C:/tools/opencv
-          key: ${{ runner.os }}-cache-opencv-460
-      - name: Install OpenCV dependencies
-        if: steps.cache-opencv-460.outputs.cache-hit != 'true'
-        run: |
-          choco install opencv --version 4.6.0
-      - name: Test
-        run: |
-          cd packages/core
-          cargo test -r --verbose
+          cargo test -r -- --nocapture

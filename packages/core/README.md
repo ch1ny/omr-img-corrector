@@ -35,9 +35,3 @@ cargo run -r -- "C:/Users/10563/Desktop/dzc.jpg" # 参数为需要读取的文�
 > 因为用了 `rust-analyze` 这个插件，导致 debug 期间经常乱编译，每次 `cargo build` 都需要重新链接编译 `opencv`。所以建议调试时也通过 **release** 运行。
 
 > 如果 `cargo run` 的过程中出现 `(exit code: 0xc0000135, STATUS_DLL_NOT_FOUND)` 的错误，请确认环境变量是否按要求配置并生效，或者将该仓库下的 `opencv_world460.dll` 拷贝至待执行的 exe 文件旁。
-
-## 测试
-
-```bash
-cargo test -r -- --nocapture
-```
