@@ -150,7 +150,7 @@ mod tests {
             let input_file_path = &filepath.to_string();
             let file_name = this_entry.file_name().to_str().unwrap();
 
-            for test_iter_idx in -450..-449 {
+            for test_iter_idx in -450..450 {
                 let original_image_rotate_angle = test_iter_idx as f64 * 0.1;
 
                 let original_image = transfer::rotate_mat(
@@ -206,15 +206,24 @@ mod tests {
 
                 let algorithm_end = instant.elapsed().as_millis();
 
+                let distance = (original_image_rotate_angle - result_angle).abs();
+
                 test_log
                     .write_all(
                         format!(
-                            "------------------\nFile: {}\nrotate: {}deg\ndistance: {}deg\ntime_cost: {}ms\nneed_check: {}\n------------------\n",
+                            "------------------\nFile: {}\nrotate: {}deg\ndistance: {}deg\ntime_cost: {}ms\nneed_check: {}\nerror_type: {}\n------------------\n",
                             file_name,
                             original_image_rotate_angle,
-                            (original_image_rotate_angle - result_angle).abs(),
+                            distance,
                             algorithm_end - algorithm_start,
-                            need_check
+                            need_check,
+                            if need_check {
+                                "NOT_BELIEVED"
+                            } else if distance > 0.5 {
+                                "ERROR"
+                            } else if distance > 0.4 {
+                                "NOT_SO_RIGHT"
+                            } else { "SUCCESS" }
                         )
                         .as_bytes(),
                     )
@@ -222,7 +231,7 @@ mod tests {
 
                 if !need_check {
                     total_times += 1;
-                    total_mistake += (original_image_rotate_angle - result_angle).abs();
+                    total_mistake += distance;
                     total_time_cost += algorithm_end - algorithm_start;
                 }
             }
