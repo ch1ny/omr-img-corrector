@@ -229,11 +229,9 @@ mod tests {
                     )
                     .unwrap();
 
-                if !need_check {
-                    total_times += 1;
-                    total_mistake += distance;
-                    total_time_cost += algorithm_end - algorithm_start;
-                }
+                total_times += 1;
+                total_mistake += distance;
+                total_time_cost += algorithm_end - algorithm_start;
 
                 println!("Test {} {}deg DONE", file_name, original_image_rotate_angle);
             }
@@ -244,5 +242,131 @@ mod tests {
             "Average Run Time = {}ms",
             total_time_cost / total_times as u128
         );
+    }
+
+    mod multi_thread {
+        use crate::omr;
+        use once_cell::sync::Lazy;
+        use std::{collections::VecDeque, sync::Mutex, thread};
+
+        type Job = Box<dyn FnOnce() + 'static + Send>;
+        // 线程池最大并行任务数
+        static MAX_WORKERS_COUNT: Mutex<usize> = Mutex::new(usize::MAX);
+        // 执行中的任务数
+        static RUNNING_WORKERS_COUNT: Mutex<usize> = Mutex::new(0);
+        // 等待中的线程队列
+        static WAITING_WORKERS_QUEUE: Mutex<Lazy<VecDeque<Job>>> =
+            Mutex::new(Lazy::new(|| VecDeque::<Job>::new()));
+        // 总任务数
+        static TOTAL_COUNT: Mutex<usize> = Mutex::new(0);
+
+        static MULTI_THREAD_INSTANT: Lazy<std::time::Instant> =
+            Lazy::new(|| std::time::Instant::now());
+        #[allow(dead_code)]
+        // #[test]
+        fn multi_thread_bench_test() {
+            let mut io_file_paths = vec![];
+            for entry in walkdir::WalkDir::new(super::DATA_SET_DIR_PATH) {
+                let this_entry = entry.unwrap();
+                if !this_entry.metadata().unwrap().is_file() {
+                    continue;
+                }
+
+                let filepath = this_entry.path().display();
+                let input_file_path = &filepath.to_string();
+                let file_name = this_entry.file_name().to_str().unwrap();
+
+                let output_file_path = String::from(
+                    std::path::Path::new("../../dataset/result/projection")
+                        .join(file_name)
+                        .to_str()
+                        .unwrap(),
+                );
+
+                if file_name.starts_with("image") {
+                    io_file_paths.push((String::from(input_file_path), output_file_path));
+                }
+            }
+
+            let algorithm_start = MULTI_THREAD_INSTANT.elapsed().as_millis();
+            println!(">> Start at {}", algorithm_start);
+            for (input_file, output_file) in io_file_paths {
+                request_task(move || {
+                    omr::correct_default(&input_file, &output_file, 45, 0.2, 248, 230, 150.0, 50.0)
+                        .unwrap();
+
+                    let mut total_count = TOTAL_COUNT.lock().unwrap();
+                    if *total_count == 99 {
+                        let algorithm_end = MULTI_THREAD_INSTANT.elapsed().as_millis();
+                        println!(">> End at {}", algorithm_end);
+                        std::process::exit(0);
+                    }
+                    *total_count += 1;
+                });
+            }
+
+            loop {}
+        }
+
+        fn before_execute() {
+            loop {
+                let max_workers_count = MAX_WORKERS_COUNT.lock().unwrap();
+                let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
+                if *running_workers_count >= *max_workers_count {
+                    // 如果当前正在执行的任务数不小于最大任务数，不做任何处理
+                    return;
+                }
+                let mut waiting_workers_queue = WAITING_WORKERS_QUEUE.lock().unwrap();
+                // 从等待队列中取出第一个任务
+                let next_worker = waiting_workers_queue.pop_front();
+                drop(max_workers_count);
+                drop(waiting_workers_queue);
+                match next_worker {
+                    None => {
+                        return;
+                    }
+                    Some(bx) => {
+                        // 如果存在待执行的任务则立即执行
+                        *running_workers_count += 1;
+                        drop(running_workers_count);
+                        execute(bx);
+                    }
+                };
+            }
+        }
+
+        fn execute<F>(f: F)
+        where
+            F: FnOnce() + 'static + Send,
+        {
+            thread::spawn(move || {
+                f();
+                // 任务执行完毕后使执行中任务计数减一
+                let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
+                *running_workers_count -= 1;
+                drop(running_workers_count);
+                // 准备执行下一个任务
+                before_execute();
+            });
+        }
+
+        pub fn request_task<F>(f: F)
+        where
+            F: FnOnce() + 'static + Send,
+        {
+            let mut running_workers_count = RUNNING_WORKERS_COUNT.lock().unwrap();
+            let max_workers_count = MAX_WORKERS_COUNT.lock().unwrap();
+            if *running_workers_count < *max_workers_count {
+                // 若当前执行中任务小于最大执行任务则立即执行
+                *running_workers_count += 1;
+                drop(running_workers_count);
+                drop(max_workers_count);
+                execute(f);
+            } else {
+                // 否则将任务添加到等待队列尾部
+                let mut waiting_workers_queue = WAITING_WORKERS_QUEUE.lock().unwrap();
+                waiting_workers_queue.push_back(Box::new(f));
+            }
+        }
     }
 }

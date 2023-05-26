@@ -10,6 +10,7 @@ opencv = { version = "0.77.0", default-features = false, features = ["highgui", 
 rand = "0.8.5"
 
 [dev-dependencies]
+once_cell = "1.17.1"
 walkdir = "2.3.3"
 
 [lib]

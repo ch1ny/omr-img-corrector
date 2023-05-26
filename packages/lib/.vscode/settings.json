@@ -3,6 +3,7 @@
 		"calib3d",
 		"consts",
 		"core",
+		"Deque",
 		"dnn",
 		"features2d",
 		"flann",
@@ -22,6 +23,7 @@
 		"powf",
 		"stitching",
 		"video",
-		"videoio"
+		"videoio",
+		"walkdir"
 	]
 }
