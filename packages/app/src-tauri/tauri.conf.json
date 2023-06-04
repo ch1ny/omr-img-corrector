@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "omr-corrector",
-		"version": "1.0.1"
+		"version": "../package.json"
 	},
 	"tauri": {
 		"allowlist": {

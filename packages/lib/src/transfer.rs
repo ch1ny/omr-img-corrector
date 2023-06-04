@@ -146,6 +146,7 @@ impl TransformableMatrix {
 
     /// 利用 opencv::highgui 窗口展示图片
     pub fn show(self: &Self, win_name: &str) -> Result<(), opencv::Error> {
+        highgui::named_window(win_name, highgui::WINDOW_NORMAL)?;
         highgui::imshow(win_name, &self.matrix)?;
         Ok(())
     }

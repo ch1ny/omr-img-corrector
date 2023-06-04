@@ -38,15 +38,15 @@ fn get_mat_projection_data(mat: &Mat) -> opencv::Result<(Vec<f64>, Vec<f64>)> {
     Ok((horizontal_projection_data, vertical_projection_data))
 }
 
-enum ResultStatus {
+pub enum ResultStatus {
     Believed,
     NeedCheck,
     NotAResult,
 }
 pub struct OmrResult {
-    angle: f64,
-    status: ResultStatus,
-    candidates: Vec<f64>,
+    pub angle: f64,
+    pub status: ResultStatus,
+    pub candidates: Vec<f64>,
 }
 
 pub fn get_result_from_projection(
