@@ -3,6 +3,7 @@
 		"calib3d",
 		"consts",
 		"core",
+		"Deque",
 		"dnn",
 		"features2d",
 		"flann",
@@ -14,6 +15,7 @@
 		"imshow",
 		"IMWRITE",
 		"ml",
+		"nocapture",
 		"objdetect",
 		"oics",
 		"opencv",
@@ -21,6 +23,7 @@
 		"powf",
 		"stitching",
 		"video",
-		"videoio"
+		"videoio",
+		"walkdir"
 	]
 }

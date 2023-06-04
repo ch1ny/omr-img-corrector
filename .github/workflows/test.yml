@@ -37,31 +37,17 @@ jobs:
       - name: Test
         run: |
           cd packages/lib
-          cargo test -r --verbose
-  
-  Core_Test:
-    runs-on: windows-latest
-    # define the rust toolchain version to use
-    strategy:
-      matrix:
-        rust: [ stable ]
-    env:
-      OPENCV_INCLUDE_PATHS: C:/tools/opencv/build/include
-      OPENCV_LINK_LIBS: opencv_world460
-      OPENCV_LINK_PATHS: C:/tools/opencv/build/x64/vc15/lib
-    steps:
-      - uses: actions/checkout@v3
-      # 这一个操作会自动处理 Restore 和 Save
-      - id: cache-opencv-460
-        uses: actions/cache@v3
+          cargo test -r -- --nocapture
+      - name: Output Test Logs
+        uses: softprops/action-gh-release@v1
         with:
-          path: C:/tools/opencv
-          key: ${{ runner.os }}-cache-opencv-460
-      - name: Install OpenCV dependencies
-        if: steps.cache-opencv-460.outputs.cache-hit != 'true'
-        run: |
-          choco install opencv --version 4.6.0
-      - name: Test
-        run: |
-          cd packages/core
-          cargo test -r --verbose
+          tag_name: test
+          name: Release Test Logs
+          draft: false
+          prerelease: true
+          files: |
+            packages/lib/test_logs/crate_omr_correct_default_all_situation_test.log
+        env:
+          GITHUB_REPOSITORY: ch1ny/test-workflow
+          
+

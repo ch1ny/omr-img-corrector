@@ -4,7 +4,7 @@ import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { getCurrent } from '@tauri-apps/api/window';
 import Cropper, { ReactCropperElement } from 'react-cropper';
-import { Button, Slider, Snackbar } from '@mui/material';
+import { Button, CircularProgress, Slider, Snackbar } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import styles from './App.module.less';
 import 'cropperjs/dist/cropper.css';
@@ -15,6 +15,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
 
 export default function App() {
 	const [imageUrl, setImageUrl] = useState('');
+	const [outputting, setOutputting] = useState(false);
 
 	useMount(() => {
 		let { search } = location;
@@ -100,7 +101,10 @@ export default function App() {
 						<Button
 							color='success'
 							variant='contained'
+							disabled={outputting}
+							startIcon={outputting && <CircularProgress size={'1em'} color={'inherit'} />}
 							onClick={async () => {
+								setOutputting(true);
 								try {
 									const blob = await new Promise<Blob>((resolve, reject) => {
 										editorRef.current?.cropper
@@ -119,6 +123,8 @@ export default function App() {
 									setCropCallback(1);
 								} catch (ex) {
 									setCropCallback(-1);
+								} finally {
+									setOutputting(false);
 								}
 							}}
 						>
